@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { COMPANY_NAME } from "@/config/constants";
 
 export default function Home() {
   return (
