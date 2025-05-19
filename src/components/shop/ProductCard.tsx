@@ -15,7 +15,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           style={{ objectFit: 'cover' }}
-          className="transition-transform duration-300 hover:scale-105"
+          className="transition-transform duration-300 hover:scale-105 "
         />
       </div>
       <div className="p-4">

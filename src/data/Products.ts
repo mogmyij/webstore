@@ -2,10 +2,18 @@ export interface Product {
   id: number;
   name: string;
   price: number;
-  image: string;
+  image: string; // Main image
+  images?: string[]; // Optional: for gallery if multiple images exist
   brand: string;
   category: string;
-  weightCapacity: number;
+  description: string; // Short description
+  longDescription: string; // Detailed description
+  specifications: {
+    weightCapacity: number; // kg
+    dimensions?: string; // e.g., "110cm x 60cm x 100cm"
+    batteryLife?: string; // e.g., "Up to 25km"
+    // Add other relevant specifications
+  };
   features: string[];
   dateAdded: Date;
 }
@@ -15,222 +23,171 @@ export const products: Product[] = [
     id: 1,
     name: "PowerGlide X500 Electric Wheelchair",
     price: 3599.99,
-    image: "/images/powerglide-x500.jpg",
+    image: "/powerglide-x500.jpg", // Ensure this image exists in /public
+    images: ["/powerglide-x500.jpg", "/easyfold-lite.jpg", "/explorer-scooter.jpg"], // Example for gallery
     brand: "MobilityPlus",
     category: "Power Wheelchair",
-    weightCapacity: 180,
-    features: ["Foldable", "Indoor/Outdoor", "Adjustable Armrests"],
+    description: "Experience unparalleled freedom with the PowerGlide X500, a robust and reliable electric wheelchair designed for active users.",
+    longDescription: "The PowerGlide X500 Electric Wheelchair offers a perfect blend of comfort, performance, and durability. Its powerful motors and advanced suspension system provide a smooth ride on various terrains. With an ergonomic design and customizable features, it ensures maximum comfort for daily use. Long-lasting battery life keeps you going all day.",
+    specifications: {
+      weightCapacity: 180,
+      dimensions: "115cm x 64cm x 98cm",
+      batteryLife: "Up to 30km",
+    },
+    features: ["Foldable Frame", "Indoor/Outdoor Use", "Adjustable Armrests", "LED Lighting"],
     dateAdded: new Date("2025-03-15")
   },
   {
     id: 2,
     name: "EasyFold Lite Travel Wheelchair",
     price: 1299.99,
-    image: "/images/easyfold-lite.jpg",
+    image: "/easyfold-lite.jpg", // Ensure this image exists in /public
     brand: "TravelMobility",
     category: "Folding Wheelchair",
-    weightCapacity: 120,
-    features: ["Foldable", "Lightweight", "Travel Friendly"],
+    description: "The EasyFold Lite is your perfect companion for travel, offering exceptional portability and ease of use.",
+    longDescription: "Designed for those on the go, the EasyFold Lite Travel Wheelchair combines a lightweight aluminum frame with a simple folding mechanism. It fits easily into car trunks and is ideal for vacations or day trips. Despite its light weight, it doesn't compromise on comfort or stability.",
+    specifications: {
+      weightCapacity: 120,
+      dimensions: "90cm x 55cm x 92cm (unfolded)",
+      batteryLife: "N/A (Manual)",
+    },
+    features: ["Ultra Lightweight", "Quick Fold", "Travel Friendly", "Compact Design"],
     dateAdded: new Date("2025-04-02")
   },
+  // ... (add description, longDescription, and specifications to other products)
+  // For products where these fields are not yet added, provide sensible defaults or empty strings.
+  // Example for product 3:
   {
     id: 3,
     name: "Explorer 4-Wheel Mobility Scooter",
     price: 2499.99,
-    image: "/images/explorer-scooter.jpg",
+    image: "/explorer-scooter.jpg",
     brand: "ScooterPro",
     category: "Mobility Scooter",
-    weightCapacity: 160,
-    features: ["All-Terrain", "Long Battery Life", "Adjustable Seat"],
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
     dateAdded: new Date("2025-03-28")
   },
   {
     id: 4,
-    name: "UltraGlide Powered Wheelchair",
-    price: 4299.99,
-    image: "/images/ultraglide.jpg",
-    brand: "MobilityPlus",
-    category: "Power Wheelchair",
-    weightCapacity: 200,
-    features: ["Indoor/Outdoor", "Adjustable", "High Weight Capacity"],
-    dateAdded: new Date("2025-02-18")
+    name: "Explorer 4-Wheel Mobility Scooter",
+    price: 2499.99,
+    image: "/explorer-scooter.jpg",
+    brand: "ScooterPro",
+    category: "Mobility Scooter",
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
+    dateAdded: new Date("2025-03-28")
   },
   {
     id: 5,
-    name: "Compact Travel Scooter",
-    price: 1899.99,
-    image: "/images/compact-scooter.jpg",
+    name: "Explorer 4-Wheel Mobility Scooter",
+    price: 2499.99,
+    image: "/explorer-scooter.jpg",
     brand: "ScooterPro",
     category: "Mobility Scooter",
-    weightCapacity: 115,
-    features: ["Foldable", "Lightweight", "Portable"],
-    dateAdded: new Date("2025-04-10")
-  },
-  {
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
+    dateAdded: new Date("2025-03-28")
+  },{
     id: 6,
-    name: "All-Terrain Freedom Scooter",
-    price: 3299.99,
-    image: "/images/freedom-scooter.jpg",
-    brand: "OutdoorMobility",
+    name: "Explorer 4-Wheel Mobility Scooter",
+    price: 2499.99,
+    image: "/explorer-scooter.jpg",
+    brand: "ScooterPro",
     category: "Mobility Scooter",
-    weightCapacity: 180,
-    features: ["All-Terrain", "Long Range", "Weather Resistant"],
-    dateAdded: new Date("2025-03-05")
-  },
-  {
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
+    dateAdded: new Date("2025-03-28")
+  },{
     id: 7,
-    name: "EasyRise Power Lift Chair",
-    price: 1599.99,
-    image: "/images/easyrise-chair.jpg",
-    brand: "ComfortPlus",
-    category: "Lift Chair",
-    weightCapacity: 150,
-    features: ["Power Lift", "Reclining", "Comfortable"],
-    dateAdded: new Date("2025-04-22")
-  },
-  {
+    name: "Explorer 4-Wheel Mobility Scooter",
+    price: 2499.99,
+    image: "/explorer-scooter.jpg",
+    brand: "ScooterPro",
+    category: "Mobility Scooter",
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
+    dateAdded: new Date("2025-03-28")
+  },{
     id: 8,
-    name: "LightGlide Manual Wheelchair",
-    price: 899.99,
-    image: "/images/lightglide.jpg",
-    brand: "TravelMobility",
-    category: "Manual Wheelchair",
-    weightCapacity: 110,
-    features: ["Lightweight", "Foldable", "Portable"],
-    dateAdded: new Date("2025-02-28")
-  },
-  {
+    name: "Explorer 4-Wheel Mobility Scooter",
+    price: 2499.99,
+    image: "/explorer-scooter.jpg",
+    brand: "ScooterPro",
+    category: "Mobility Scooter",
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
+    dateAdded: new Date("2025-03-28")
+  },{
     id: 9,
-    name: "Bariatric Power Wheelchair",
-    price: 4899.99,
-    image: "/images/bariatric-power.jpg",
-    brand: "MobilityPlus",
-    category: "Power Wheelchair",
-    weightCapacity: 250,
-    features: ["High Weight Capacity", "Extra Wide Seat", "Durable"],
-    dateAdded: new Date("2025-03-12")
-  },
-  {
+    name: "Explorer 4-Wheel Mobility Scooter",
+    price: 2499.99,
+    image: "/explorer-scooter.jpg",
+    brand: "ScooterPro",
+    category: "Mobility Scooter",
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
+    dateAdded: new Date("2025-03-28")
+  },{
     id: 10,
-    name: "Compact Indoor Scooter",
-    price: 1499.99,
-    image: "/images/indoor-scooter.jpg",
+    name: "Explorer 4-Wheel Mobility Scooter",
+    price: 2499.99,
+    image: "/explorer-scooter.jpg",
     brand: "ScooterPro",
     category: "Mobility Scooter",
-    weightCapacity: 120,
-    features: ["Indoor Use", "Tight Turning Radius", "Compact"],
-    dateAdded: new Date("2025-04-15")
+    description: "Navigate your world with confidence on the Explorer 4-Wheel Mobility Scooter, built for stability and range.",
+    longDescription: "The Explorer 4-Wheel Mobility Scooter provides exceptional stability and comfort for outdoor adventures. It features large, pneumatic tires, a full suspension system, and a powerful motor to tackle various terrains. The captain's seat offers all-day comfort, and the intuitive controls make operation simple.",
+    specifications: {
+      weightCapacity: 160,
+      batteryLife: "Up to 40km",
+      dimensions: "130cm x 65cm x 110cm"
+    },
+    features: ["All-Terrain", "Long Battery Life", "Adjustable Captain's Seat", "Front & Rear Lights"],
+    dateAdded: new Date("2025-03-28")
   },
-  {
-    id: 11,
-    name: "Heavy Duty Outdoor Scooter",
-    price: 3899.99,
-    image: "/images/heavy-duty-scooter.jpg",
-    brand: "OutdoorMobility",
-    category: "Mobility Scooter",
-    weightCapacity: 220,
-    features: ["All-Terrain", "High Weight Capacity", "Long Range"],
-    dateAdded: new Date("2025-02-05")
-  },
-  {
-    id: 12,
-    name: "Pediatric Wheelchair",
-    price: 1299.99,
-    image: "/images/pediatric-wheelchair.jpg",
-    brand: "KidsMobility",
-    category: "Manual Wheelchair",
-    weightCapacity: 80,
-    features: ["Adjustable", "Lightweight", "Kid-Friendly"],
-    dateAdded: new Date("2025-03-20")
-  },
-  {
-    id: 13,
-    name: "Premium Power Recline Wheelchair",
-    price: 5299.99,
-    image: "/images/power-recline.jpg",
-    brand: "MobilityPlus",
-    category: "Power Wheelchair",
-    weightCapacity: 180,
-    features: ["Power Recline", "Headrest", "Leg Elevation"],
-    dateAdded: new Date("2025-01-25")
-  },
-  {
-    id: 14,
-    name: "Portable Travel Scooter",
-    price: 1099.99,
-    image: "/images/travel-scooter.jpg",
-    brand: "TravelMobility",
-    category: "Mobility Scooter",
-    weightCapacity: 100,
-    features: ["Disassembles", "Lightweight", "Compact"],
-    dateAdded: new Date("2025-04-05")
-  },
-  {
-    id: 15,
-    name: "Sports Active Wheelchair",
-    price: 2199.99,
-    image: "/images/sports-wheelchair.jpg",
-    brand: "ActiveLife",
-    category: "Manual Wheelchair",
-    weightCapacity: 120,
-    features: ["Lightweight", "Athletic Design", "Customizable"],
-    dateAdded: new Date("2025-03-17")
-  },
-  {
-    id: 16,
-    name: "Deluxe Power Standing Wheelchair",
-    price: 6999.99,
-    image: "/images/standing-wheelchair.jpg",
-    brand: "MobilityPlus",
-    category: "Power Wheelchair",
-    weightCapacity: 160,
-    features: ["Standing Function", "Power Recline", "Advanced Controls"],
-    dateAdded: new Date("2025-02-12")
-  },
-  {
-    id: 17,
-    name: "Economy Manual Wheelchair",
-    price: 599.99,
-    image: "/images/economy-wheelchair.jpg",
-    brand: "BasicMobility",
-    category: "Manual Wheelchair",
-    weightCapacity: 120,
-    features: ["Foldable", "Affordable", "Standard"],
-    dateAdded: new Date("2025-04-18")
-  },
-  {
-    id: 18,
-    name: "Luxury Indoor/Outdoor Scooter",
-    price: 3499.99,
-    image: "/images/luxury-scooter.jpg",
-    brand: "ScooterPro",
-    category: "Mobility Scooter",
-    weightCapacity: 170,
-    features: ["Comfortable Seat", "Long Range", "Indoor/Outdoor"],
-    dateAdded: new Date("2025-03-01")
-  },
-  {
-    id: 19,
-    name: "Ultra-Compact Folding Scooter",
-    price: 2299.99,
-    image: "/images/folding-scooter.jpg",
-    brand: "TravelMobility",
-    category: "Mobility Scooter",
-    weightCapacity: 115,
-    features: ["Auto-Folding", "Airline Approved", "Lightweight"],
-    dateAdded: new Date("2025-02-22")
-  },
-  {
-    id: 20,
-    name: "All-Terrain Power Wheelchair",
-    price: 4799.99,
-    image: "/images/all-terrain-wheelchair.jpg",
-    brand: "OutdoorMobility",
-    category: "Power Wheelchair",
-    weightCapacity: 200,
-    features: ["Off-Road Capable", "All-Terrain Tires", "Rugged"],
-    dateAdded: new Date("2025-01-30")
-  }
 ];
 
 export const getAllBrands = (): string[] => {

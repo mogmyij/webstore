@@ -1,0 +1,126 @@
+// app/bag/page.tsx
+"use client";
+
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useCart, CartItem } from '@/context/CartContext';
+import { XMarkIcon } from '@heroicons/react/24/solid';
+import QuantitySelector from '@/components/shop/QuantitySelector';
+
+const CartItemRow = ({ item, onUpdateQuantity, onRemoveItem }: { item: CartItem, onUpdateQuantity: (productId: number, newQuantity: number) => void, onRemoveItem: (productId: number) => void }) => {
+  return (
+    <div className="flex items-center py-4 border-b">
+      <Link href={`/shop/${item.id}`} className="mr-4">
+        <Image src={item.image} alt={item.name} width={96} height={96} className="w-24 h-24 object-cover" />
+      </Link>
+      <div className="flex-grow">
+        <Link href={`/shop/${item.id}`} className="font-semibold hover:text-blue-600">{item.name}</Link>
+        <div className="text-gray-600 text-sm">SGD {item.price.toFixed(2)}</div>
+      </div>
+      <QuantitySelector quantity={item.quantity} onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)} />
+      <div className="ml-4 font-semibold">SGD {(item.price * item.quantity).toFixed(2)}</div>
+      <button onClick={() => onRemoveItem(item.id)} className="ml-4 text-gray-500 hover:text-red-600">
+        <XMarkIcon className="h-6 w-6" />
+      </button>
+    </div>
+  );
+};
+
+const OrderSummary = () => {
+  const { getCartTotal, clearCart, cartItems } = useCart();
+  const router = useRouter();
+  const total = getCartTotal();
+
+  return (
+    <div className="p-6 bg-gray-50 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+      <div className="flex justify-between py-2 border-b">
+        <span>Subtotal:</span>
+        <span>SGD {total.toFixed(2)}</span>
+      </div>
+      <div className="flex justify-between py-2">
+        <span>Total:</span>
+        <span className="font-semibold">SGD {total.toFixed(2)}</span>
+      </div>
+      <button
+        onClick={() => router.push('/checkout')}
+        className={`w-full py-3 mt-4 text-white font-semibold rounded-md ${cartItems.length > 0 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
+          }`}
+        disabled={cartItems.length === 0}
+      >
+        Proceed to Checkout
+      </button>
+      {cartItems.length > 0 && (
+        <button
+          onClick={() => {
+            if (window.confirm('Are you sure you want to clear your cart?')) clearCart();
+          }}
+          className="w-full py-3 mt-2 border border-gray-400 rounded-md hover:bg-gray-100"
+        >
+          Clear Cart
+        </button>
+      )}
+    </div>
+  );
+};
+
+const ShoppingCartPage = () => {
+  const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+  const router = useRouter();
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-semibold mb-4">Shopping Cart</h1>
+      <nav className="mb-4">
+        <ol className="list-none p-0 inline-flex space-x-2">
+          <li className="flex items-center">
+            <Link href="/" className="text-blue-600 hover:underline">Home</Link>
+            <span>&gt;</span>
+          </li>
+          <li className="flex items-center">
+            <Link href="/shop" className="text-blue-600 hover:underline">Shop</Link>
+            <span>&gt;</span>
+          </li>
+          <li>
+            Shopping Cart
+          </li>
+        </ol>
+      </nav>
+
+      <div className="md:grid md:grid-cols-3 md:gap-8">
+        <div className="md:col-span-2">
+          {cartItems.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-lg text-gray-600">Your cart is currently empty.</p>
+              <Link href="/shop" className="inline-block mt-4 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Continue Shopping</Link>
+            </div>
+          ) : (
+            <div>
+              <div className="hidden md:flex items-center py-2 border-b">
+                <div className="w-1/3 font-semibold">Product</div>
+                <div className="w-1/3 font-semibold">Quantity</div>
+                <div className="w-1/3 font-semibold">Total</div>
+              </div>
+              {cartItems.map((item) => (
+                <CartItemRow
+                  key={item.id}
+                  item={item}
+                  onUpdateQuantity={updateQuantity}
+                  onRemoveItem={removeFromCart}
+                />
+              ))}
+              <Link href="/shop" className="inline-block mt-4 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Continue Shopping</Link>
+            </div>
+          )}
+        </div>
+        <div className="md:col-span-1">
+          <OrderSummary />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ShoppingCartPage;

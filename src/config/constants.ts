@@ -1,1 +1,1 @@
-export const COMPANY_NAME = "{{COMPANY_NAME}}"
+export const COMPANY_NAME = "Karvana"

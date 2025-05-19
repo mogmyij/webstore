@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const Banner = () => {
   return (
-    <div className="relative bg-black">
+    <div className="relative bg-black mt-[-10px] md:mt-[-90px] lg:mt-[-60px]">
       <img
         src="/banner-image.jpg" // Replace with your actual image
         alt="Banner"

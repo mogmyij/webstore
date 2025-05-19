@@ -5,7 +5,7 @@
 @tailwindcss utilities
 
 :root {
-  --background: #f0f0f0;
+  --background: #ffffff;
 }
 
 @theme inline {
@@ -23,6 +23,6 @@
 }
 
 body {
-  background: var(--background);
+  background: #ffffff;
   font-family: Arial, Helvetica, sans-serif;
 }

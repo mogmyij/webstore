@@ -2,7 +2,7 @@ import React from 'react';
 
 const Benefits = () => {
   return (
-    <div className="bg-custom-gray text-white py-12 px-6">
+<div className="bg-stone-900 text-white py-12 px-6">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold">Benefits designed for you</h2>
         <a href="#" className="text-gray-400 hover:text-white">More →</a>

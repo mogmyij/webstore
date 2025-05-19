@@ -77,6 +77,16 @@ export default function FilterSidebar({
     }
   };
 
+  const handleClearAllFilters = () => {
+    setPriceRange([minPrice, maxPrice]);
+    setSelectedBrands([]);
+    setSelectedCategories([]);
+    setSelectedFeatures([]);
+    setSelectedWeightRanges([]);
+    // Optionally, you might want to close the sidebar on mobile after clearing
+    // if (isOpen) setIsOpen(false); 
+  };
+
   return (
     <>
       {/* Mobile filter button */}
@@ -104,6 +114,7 @@ export default function FilterSidebar({
               <span>SGD {priceRange[0].toFixed(2)}</span>
               <span>SGD {priceRange[1].toFixed(2)}</span>
             </div>
+            <p> Minimum price </p>
             <input
               type="range"
               min={minPrice}
@@ -111,7 +122,9 @@ export default function FilterSidebar({
               value={priceRange[0]}
               onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
               className="w-full"
+              aria-label='Minimum price'
             />
+            <p> Maximum price </p>
             <input
               type="range"
               min={minPrice}
@@ -119,6 +132,7 @@ export default function FilterSidebar({
               value={priceRange[1]}
               onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
               className="w-full"
+              aria-label='Maximum price'
             />
           </div>
         </div>
@@ -198,6 +212,14 @@ export default function FilterSidebar({
             ))}
           </div>
         </div>
+        {/*reset filters*/}
+        <button
+          onClick={handleClearAllFilters}
+          className='flex-1 border text-black font-semibold py-3 px-6 rounded-md 
+          hover:bg-blue-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          '>
+          Clear Filters
+        </button>
       </aside>
     </>
   );
