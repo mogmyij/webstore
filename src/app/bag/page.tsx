@@ -11,17 +11,19 @@ import QuantitySelector from '@/components/shop/QuantitySelector';
 
 const CartItemRow = ({ item, onUpdateQuantity, onRemoveItem }: { item: CartItem, onUpdateQuantity: (productId: number, newQuantity: number) => void, onRemoveItem: (productId: number) => void }) => {
   return (
-    <div className="flex items-center py-4 border-b">
-      <Link href={`/shop/${item.id}`} className="mr-4">
+    <div className="grid grid-cols-5 gap-4 py-4 border-b items-center">
+      <Link href={`/shop/${item.id}`} className="col-span-1">
         <Image src={item.image} alt={item.name} width={96} height={96} className="w-24 h-24 object-cover" />
       </Link>
-      <div className="flex-grow">
+      <div className="col-span-1">
         <Link href={`/shop/${item.id}`} className="font-semibold hover:text-blue-600">{item.name}</Link>
         <div className="text-gray-600 text-sm">SGD {item.price.toFixed(2)}</div>
       </div>
-      <QuantitySelector quantity={item.quantity} onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)} />
-      <div className="ml-4 font-semibold">SGD {(item.price * item.quantity).toFixed(2)}</div>
-      <button onClick={() => onRemoveItem(item.id)} className="ml-4 text-gray-500 hover:text-red-600">
+      <div className="col-span-1 flex justify-center">
+        <QuantitySelector quantity={item.quantity} onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)} />
+      </div>
+      <div className="col-span-1 font-semibold text-center">SGD {(item.price * item.quantity).toFixed(2)}</div>
+      <button onClick={() => onRemoveItem(item.id)} className="col-span-1 text-gray-500 hover:text-red-600 flex justify-center">
         <XMarkIcon className="h-6 w-6" />
       </button>
     </div>
@@ -98,10 +100,12 @@ const ShoppingCartPage = () => {
             </div>
           ) : (
             <div>
-              <div className="hidden md:flex items-center py-2 border-b">
-                <div className="w-1/3 font-semibold">Product</div>
-                <div className="w-1/3 font-semibold">Quantity</div>
-                <div className="w-1/3 font-semibold">Total</div>
+              <div className="hidden md:grid grid-cols-5 gap-4 py-2 border-b">
+                <div className="col-span-1 font-semibold">Product</div>
+                <div className="col-span-1 font-semibold"></div>
+                <div className="col-span-1 font-semibold flex justify-center">Quantity</div>
+                <div className="col-span-1 font-semibold text-center">Total</div>
+                <div className="col-span-1 font-semibold flex justify-center"></div>
               </div>
               {cartItems.map((item) => (
                 <CartItemRow
