@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { getAllBrands, getAllCategories, getAllFeatures } from '@/data/Products';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 
 interface FilterSidebarProps {
   priceRange: [number, number];
@@ -110,30 +112,33 @@ export default function FilterSidebar({
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Price</h3>
           <div className="flex flex-col space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>SGD {priceRange[0].toFixed(2)}</span>
-              <span>SGD {priceRange[1].toFixed(2)}</span>
+            <div className="flex justify-between text-xm text-gray-600">
+              <span>From: SGD {priceRange[0].toFixed(2)}</span>
+              <span>To: SGD {priceRange[1].toFixed(2)}</span>
             </div>
-            <p> Minimum price </p>
-            <input
-              type="range"
+            <Slider
+              range
               min={minPrice}
               max={maxPrice}
-              value={priceRange[0]}
-              onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-              className="w-full"
-              aria-label='Minimum price'
+              value={priceRange as [number,number]}
+              onChange={(value: number | number[]) => {
+                if (Array.isArray(value) && value.length === 2) {
+                  setPriceRange(value as [number, number]);
+                }
+              }}
+              className="my-4"
+              trackStyle={{ backgroundColor: '#4B5563' }} // Customize the track color to match your design
+              handleStyle={[  // Customize handle styles
+                { borderColor: '#4B5563' },
+                { borderColor: '#4B5563' }
+              ]}
+              railStyle={{ backgroundColor: '#E5E7EB' }} // Customize rail color
+              aria-label="Price range slider"
             />
-            <p> Maximum price </p>
-            <input
-              type="range"
-              min={minPrice}
-              max={maxPrice}
-              value={priceRange[1]}
-              onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-              className="w-full"
-              aria-label='Maximum price'
-            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>Min: SGD {minPrice.toFixed(2)}</span>
+              <span>Max: SGD {maxPrice.toFixed(2)}</span>
+            </div>
           </div>
         </div>
 

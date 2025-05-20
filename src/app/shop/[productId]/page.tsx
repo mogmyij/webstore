@@ -149,13 +149,19 @@ export default function ProductDetailPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-blue-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-md 
+                hover:bg-blue-700 active:bg-blue-800 active:scale-95 
+                transition duration-150 ease-in-out 
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add to Cart
               </button>
               <button
                 onClick={handleBuyNow}
-                className="flex-1 bg-green-500 text-white font-semibold py-3 px-6 rounded-md hover:bg-green-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="flex-1 bg-green-500 text-white font-semibold py-3 px-6 rounded-md 
+                hover:bg-green-600 transition duration-150 ease-in-out focus:outline-none 
+                focus:ring-2 focus:ring-green-500 focus:ring-offset-2 active:bg-green-800 active:scale-95"
               >
                 Buy Now
               </button>

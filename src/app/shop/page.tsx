@@ -100,7 +100,7 @@ export default function ShopPage() {
           alt="Banner"
           className="opacity-70 w-full h-100 object-cover object-[center_0%]"
         />
-        <h1 className="absolute text-5xl bottom-0 left-1/9 text-white mb-8">Mobility <br/> Solutions</h1>
+        <h1 className="absolute text-6xl bottom-0 left-1/9 text-white mb-8">Mobility <br/> Solutions</h1>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

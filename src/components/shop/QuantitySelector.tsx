@@ -41,19 +41,12 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({ quantity, onQuantit
       >
         <MinusIcon className="h-5 w-5 text-gray-700" />
       </button>
-      <input
-        type="number" // Changed to number for better semantics and mobile keyboard
-        value={quantity}
-        onChange={handleChange}
-        onBlur={(e) => { // Ensure value is within bounds on blur
-            if (parseInt(e.target.value) < min) onQuantityChange(min);
-            if (parseInt(e.target.value) > max) onQuantityChange(max);
-        }}
-        min={min}
-        max={max}
-        className="w-12 text-center border-t border-b border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        aria-label="Current quantity"
-      />
+      <span 
+        className="w-12 text-center border-t border-b border-gray-300 py-2 px-1 font-medium"
+        data-testid="quantity-display"
+      >
+        {quantity}
+      </span>
       <button
         type="button"
         onClick={handleIncrement}
