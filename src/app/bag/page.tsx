@@ -92,7 +92,7 @@ const ShoppingCartPage = () => {
         </ol>
       </nav>
 
-      <div className="md:grid md:grid-cols-3 md:gap-8">
+      <div className="md:grid md:grid-cols-3 md:gap-10">
         <div className="md:col-span-2">
           {cartItems.length === 0 ? (
             <div className="text-center py-10">
