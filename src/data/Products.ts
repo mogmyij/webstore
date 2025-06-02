@@ -21,10 +21,10 @@ export interface Product {
 export const products: Product[] = [
   {
     id: 1,
-    name: "PowerGlide X500 Electric Wheelchair",
+    name: "zander chair",
     price: 3599.99,
     image: "/powerglide-x500.jpg", // Ensure this image exists in /public
-    images: ["/powerglide-x500.jpg", "/easyfold-lite.jpg", "/explorer-scooter.jpg"], // Example for gallery
+    images: ["/powerglide-x500.jpg", "/easyfold-lite.jpg", "/explorer-scooter.jpg", "/powerglide-x500.jpg"], // Example for gallery
     brand: "MobilityPlus",
     category: "Power Wheelchair",
     description: "Experience unparalleled freedom with the PowerGlide X500, a robust and reliable electric wheelchair designed for active users.",

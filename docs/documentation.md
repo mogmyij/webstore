@@ -17,7 +17,7 @@ This document provides an overview of the Karvana e-commerce project's codebase.
 The project is organized into several key directories:
 
 *   `app/`: Contains page components and layouts, following Next.js App Router conventions.
-*   `components/`: Houses reusable UI components, categorized into `common/`, `homepage/`, and `shop/`.
+*   `components/`: Houses reusable UI components, categorized into `common/`, `homepage/`, `shop/`, and `checkout/`.
 *   `context/`: Manages global state, notably the `CartContext`.
 *   `data/`: Stores mock product data and related interfaces/functions.
 *   `config/`: Contains configuration files, like constants.
@@ -132,6 +132,29 @@ The project is organized into several key directories:
         *   "Proceed to Payment" button: Disabled if the form is invalid or cart is empty. Linked to the form submission via `form="checkout-form"` (although the form tag is `md:col-span-2` and the button is in `md:col-span-1`). The `onClick={handleProceed}` on the button itself also triggers submission logic.
     *   Includes breadcrumbs.
 
+*   **`app/checkout/confirmation/page.tsx` (Order Confirmation Page)**:
+    *   Displays the successful order confirmation after checkout completion.
+    *   **Mock Data**: Uses comprehensive mock order data including transaction details, customer information, purchased items, pricing breakdown, and payment information.
+    *   **Page Structure**:
+        *   Progress breadcrumbs showing the checkout flow completion.
+        *   Success message and order metadata display.
+        *   Complete order details including purchased items list.
+        *   Invoice details with pricing breakdown (subtotal, discount, shipping, total).
+        *   Payment information showing payment method and order timestamp.
+        *   Customer billing and shipping details.
+        *   Email notification confirmation.
+        *   "Continue Shopping" call-to-action button.
+    *   **UI Components Used**:
+        *   `OrderSuccessDisplay`: Shows success checkmark icon and confirmation message.
+        *   `OrderMetaInfo`: Displays order date and customer name.
+        *   `PurchasedItemsList`: Shows all purchased items with images, quantities, and prices.
+        *   `InvoiceDetails`: Displays transaction ID and complete price breakdown.
+        *   `PaymentInfo`: Shows payment method details and order timestamp.
+        *   `CustomerDetails`: Displays both billing and shipping information.
+        *   `EmailNotification`: Confirms email notification details.
+        *   `ContinueShoppingButton`: Provides navigation back to shopping.
+    *   **SEO**: Includes proper metadata for the confirmation page.
+
 ### 3.3. Reusable Components (`components/` directory)
 
 *   **`components/common/`**:
@@ -158,6 +181,50 @@ The project is organized into several key directories:
         *   Responsive: Includes a "Filters" button to toggle visibility on mobile (`isOpen`, `setIsOpen` props).
     *   `SortDropdown.tsx`: A dropdown menu for selecting product sort order. Manages its own open/close state (`isOpen`). Options include 'Newest', 'Name (A-Z)', 'Name (Z-A)', 'Price (Low to High)', 'Price (High to Low)'.
     *   `QuantitySelector.tsx`: A component with "+" and "-" buttons and a display for quantity. Used on product detail and cart pages. Takes `quantity`, `onQuantityChange`, `min` (default 1), `max` (default 99) as props.
+
+*   **`components/checkout/`** (New):
+    *   `OrderSuccessDisplay.tsx`: 
+        *   Displays a prominent success message with green checkmark icon.
+        *   Provides visual confirmation that the order was successfully placed.
+        *   Uses consistent styling with green color scheme for success states.
+    
+    *   `OrderMetaInfo.tsx`:
+        *   Shows essential order metadata (order date, customer name).
+        *   Displays information in a clean, readable format below the success message.
+    
+    *   `PurchasedItemsList.tsx`:
+        *   Renders a complete list of purchased items.
+        *   Each item displays: product image, name, quantity, and individual price.
+        *   Uses `PurchasedItemCard` sub-component for consistent item presentation.
+        *   Integrates with Next.js Image component for optimized image loading.
+    
+    *   `InvoiceDetails.tsx`:
+        *   Displays comprehensive pricing breakdown in a structured format.
+        *   Shows transaction ID, subtotal, discount (if applicable), shipping costs, and final total.
+        *   Uses Singapore Dollar (S$) currency formatting.
+        *   Provides clear visual hierarchy with emphasized total amount.
+    
+    *   `PaymentInfo.tsx`:
+        *   Shows payment method details including card type, last 4 digits, and brand.
+        *   Displays formatted order date and time with proper localization.
+        *   Uses credit card icon for visual clarity.
+        *   Formats timestamps in GB locale with 12-hour format.
+    
+    *   `CustomerDetails.tsx`:
+        *   Displays both billing and shipping information side-by-side.
+        *   Handles optional company field in billing details.
+        *   Uses responsive grid layout for mobile and desktop views.
+        *   Provides clear section headers and consistent formatting.
+    
+    *   `EmailNotification.tsx`:
+        *   Confirms that order confirmation email has been sent.
+        *   Displays the email address where confirmation was sent.
+        *   Provides reassurance about email delivery timing.
+    
+    *   `ContinueShoppingButton.tsx`:
+        *   Provides clear call-to-action to return to shopping.
+        *   Links back to the main shop page.
+        *   Uses consistent button styling with the rest of the application.
 
 ### 3.4. State Management (`context/` directory)
 
@@ -208,7 +275,96 @@ The project is organized into several key directories:
     *   Exports constants used across the application.
     *   Currently defines `COMPANY_NAME = "Karvana"`.
 
-## 4. Key Architectural Decisions & Patterns
+## 4. Core Data Types
+
+### 4.1. Order Data Structure
+
+The application now uses a standardized `Order` interface defined in `types/order.ts` to ensure data consistency across order-related functionality and prepare for future API and database integrations.
+
+#### Order Interface
+
+The main `Order` interface represents a complete order in the system:
+
+```typescript
+interface Order {
+  // Core Order Identifiers
+  id: string;                         // Unique system-generated order ID (UUID v4)
+  userFacingOrderId?: string;         // Human-readable order number (e.g., "KV-20250001")
+  createdAt: string;                  // ISO 8601: Order creation timestamp
+  updatedAt: string;                  // ISO 8601: Order last update timestamp
+
+  // Customer & Shipping Information
+  customerDetails: OrderCustomerDetails;
+  shippingAddress: OrderShippingAddress;
+
+  // Order Items
+  items: OrderItem[];
+
+  // Financial Summary
+  subtotal: number;                   // Sum of (item.price * item.quantity) for all items
+  discountAmount?: number;            // Optional: Total discount applied to the order
+  shippingCost?: number;              // Optional: Cost for shipping
+  totalAmount: number;                // Final amount (subtotal - discountAmount + shippingCost)
+
+  // Order Status
+  status: 'pending_payment' | 'payment_failed' | 'awaiting_shipment' | 'shipped' | 'delivered' | 'cancelled';
+
+  // Payment Information
+  paymentDetails?: OrderPaymentDetails; // Will be populated/updated after payment attempts/webhooks
+
+  // Optional Notes
+  customerNotes?: string;             // Notes provided by the customer during checkout
+}
+```
+
+#### Supporting Interfaces
+
+**OrderItem**: Represents a single item in an order
+- `productId: number` - Links to the product catalog
+- `name: string` - Product name at time of purchase
+- `price: number` - Price at time of purchase (preserves historical pricing)
+- `quantity: number` - Number of items ordered
+- `image: string` - Product image URL
+
+**OrderCustomerDetails**: Customer information collected during checkout
+- `fullName: string` - Customer's full name
+- `email: string` - Customer's email address
+- `phone: string` - Customer's phone number
+
+**OrderShippingAddress**: Shipping destination details
+- `address1: string` - Primary address line
+- `address2?: string` - Optional secondary address line
+- `city: string` - City name
+- `postalCode: string` - Postal/ZIP code
+- `country: string` - Country (defaults to "Singapore")
+
+**OrderPaymentDetails**: Payment transaction information (designed for HitPay integration)
+- `hitpayPaymentRequestId?: string` - HitPay payment request ID
+- `hitpayPaymentId?: string` - HitPay payment ID from webhook
+- `status?: string` - Payment status ('pending', 'succeeded', 'failed', 'requires_action')
+- `amountCharged?: number` - Actual amount charged
+- `currency?: string` - Payment currency (e.g., 'SGD')
+- `paymentMethodType?: string` - Payment method (e.g., 'card', 'paynow_online')
+- `paymentMethodBrand?: string` - Card brand (e.g., 'Visa')
+- `paymentMethodLast4?: string` - Last 4 digits of payment method
+- `transactionDate?: string` - ISO 8601 timestamp of transaction
+
+#### Data Alignment with Checkout Flow
+
+The Order structure is designed to align with data collected throughout the user journey:
+
+1. **Cart Items → OrderItem[]**: Cart items from `CartContext` map directly to `OrderItem` objects
+2. **Checkout Form → Customer/Shipping Details**: `CheckoutFormData` maps to `OrderCustomerDetails` and `OrderShippingAddress`
+3. **Payment Integration → OrderPaymentDetails**: Structured to receive data from HitPay payment gateway
+4. **Order Management → Order Status**: Supports complete order lifecycle tracking
+
+This unified structure standardizes data handling and prepares the application for:
+- Payment gateway integration (Block 3 & 4)
+- Database integration (Block 5)  
+- Order management features
+- API development
+
+## 5. Key Architectural Decisions & Patterns
 
 *   **Client-Side Rendering with State Management (`"use client"`)**: Many components are marked with `"use client";` because they use React Hooks (`useState`, `useEffect`, `useContext`) or interact with browser APIs (like `localStorage` or `next/navigation`'s `useRouter`, `useParams`). This is standard for interactive components in Next.js App Router.
 *   **Props Drilling vs. Context**:
@@ -225,6 +381,17 @@ The project is organized into several key directories:
     *   Shopping cart (`cartItems`) is persisted in `localStorage` via `CartContext`.
     *   Checkout form data (`form`) is persisted in `localStorage` directly within `CheckoutPage`.
 *   **Mock Data**: Product information is currently hardcoded in `data/Products.ts`. In a real application, this would come from a backend API and database.
+*   **Order Confirmation Flow**:
+    *   The confirmation page uses comprehensive mock data to simulate a complete order processing system.
+    *   Component composition allows for flexible layout and easy maintenance of individual sections.
+    *   Each confirmation component is designed to be reusable and potentially data-driven in future implementations.
+    *   The page maintains consistent styling and user experience with the rest of the checkout flow.
+
+*   **Component Design for Checkout**:
+    *   Checkout components are designed with clear separation of concerns.
+    *   Each component handles a specific aspect of order confirmation (success display, invoice, payment info, etc.).
+    *   Props-based design allows for easy testing and reusability.
+    *   Consistent TypeScript interfaces ensure type safety across all checkout components.
 
 ## 5. Potential Areas for Future Development (based on code structure)
 
@@ -234,3 +401,19 @@ The project is organized into several key directories:
 *   **Order Management Backend**: A backend system to store and manage orders created after successful checkout.
 *   **Mobile Responsiveness**: While Tailwind CSS provides tools for responsiveness and some responsive classes are used (e.g. `md:` prefixes), a dedicated pass for mobile UX refinement might be needed.
 *   **Error Handling & Loading States**: More robust error handling (e.g., for failed data fetching if APIs were used) and visual loading states (skeletons, spinners) could be added. The product detail page has a basic "Loading..." message.
+*   **Order Confirmation Enhancements**:
+    *   Replace mock order data with real order information from backend APIs.
+    *   Implement order tracking functionality with tracking numbers and status updates.
+    *   Add PDF invoice generation and download capability.
+    *   Integrate with email service for automated order confirmation emails.
+    *   Add order history access for returning customers when user accounts are implemented.
+
+*   **Enhanced Payment Integration**:
+    *   The current payment info display is designed to work with various payment methods.
+    *   Future integration with HitPay or other payment providers can easily populate the payment information components.
+    *   Support for additional payment methods (digital wallets, bank transfers) can be added through the existing PaymentInfo component structure.
+
+*   **Order Management Features**:
+    *   The confirmation page structure supports future features like order modifications, cancellations, or returns.
+    *   Component architecture allows for easy addition of customer service contact information or support chat integration.
+    *   The detailed order display can be extended to include estimated delivery dates and shipping tracking.

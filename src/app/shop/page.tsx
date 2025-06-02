@@ -7,6 +7,7 @@ import { products, Product } from '@/data/Products';
 import ProductCard from '@/components/shop/ProductCard';
 import FilterSidebar from '@/components/shop/FilterSidebar';
 import SortDropdown from '@/components/shop/SortDropdown';
+import Breadcrumb from '@/components/common/Breadcrumb';
 
 export default function ShopPage() {
   // Find min and max price from products
@@ -91,6 +92,11 @@ export default function ShopPage() {
     setFilteredProducts(result);
   }, [searchTerm, priceRange, selectedBrands, selectedCategories, selectedFeatures, selectedWeightRanges, sortOption]);
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Products', current: true }
+  ];
+
   return (
     <div>
       {/* Page Title */}
@@ -105,21 +111,7 @@ export default function ShopPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center space-x-2 text-sm text-gray-500">
-            <li>
-              <Link href="/" className="hover:text-blue-600">
-                Home
-              </Link>
-            </li>
-            <li>
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
-            </li>
-            <li className="font-semibold text-gray-800">Products</li>
-          </ol>
-        </nav>
+        <Breadcrumb items={breadcrumbItems} />
 
         <hr className='opacity-15 py-4'/>
 

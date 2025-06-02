@@ -11,11 +11,9 @@ const Banner = () => {
       />
       <div className="absolute top-1/2 left-1/8 transform -translate-y-1/2 text-left">
         <h1 className="text-8xl text-white mb-4">
-          EXPAND
+          MOBILITY IS
           <br />
-          OUR
-          <br />
-          HORIZONS
+          FREEDOM
         </h1>
         <p className="text-white text-lg mb-6">
           Discover a world without borders

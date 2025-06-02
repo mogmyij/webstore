@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useCart, CartItem } from '@/context/CartContext';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import QuantitySelector from '@/components/shop/QuantitySelector';
+import Breadcrumb from '@/components/common/Breadcrumb';
 
 const CartItemRow = ({ item, onUpdateQuantity, onRemoveItem }: { item: CartItem, onUpdateQuantity: (productId: number, newQuantity: number) => void, onRemoveItem: (productId: number) => void }) => {
   return (
@@ -62,35 +63,18 @@ const ShoppingCartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, } = useCart();
   const router = useRouter();
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Shop', href: '/shop' },
+    { label: 'Shopping Cart', current: true }
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-semibold mb-4">Shopping Cart</h1>
-      {/*breadcrumbs */}
-      <nav className="mb-6">
-        <ol className="flex items-center space-x-2 text-sm text-gray-500">
-          <li>
-            <Link href="/" className="hover:text-blue-600">
-              Home
-            </Link>
-          </li>
-          <li>
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </li>
-          <li>
-            <Link href="/shop" className="hover:text-blue-600">
-              Shop
-            </Link>
-          </li>
-          <li>
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </li>
-          <li className="font-semibold text-gray-800">Shopping Cart</li>
-        </ol>
-      </nav>
+      
+      {/* Breadcrumbs */}
+      <Breadcrumb items={breadcrumbItems} />
 
       <div className="md:grid md:grid-cols-3 md:gap-10">
         <div className="md:col-span-2">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import Breadcrumb from "@/components/common/Breadcrumb";
 
 // --- Types ---
 interface CheckoutFormData {
@@ -178,6 +179,13 @@ export default function CheckoutPage() {
     }
   };
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Shop', href: '/shop' },
+    { label: 'Shopping Cart', href: '/bag' },
+    { label: 'Checkout', current: true }
+  ];
+
   // --- UI ---
 
   return (
@@ -185,35 +193,7 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold mb-2">Secure Checkout</h1>
 
       {/* Breadcrumbs */}
-      <nav className="mb-6">
-        <ol className="flex items-center space-x-2 text-sm text-gray-500">
-          <li>
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-          </li>
-          <li>
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </li>
-          <li>
-            <Link href="/shop" className="hover:text-blue-600">Shop</Link>
-          </li>
-          <li>
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </li>
-          <li>
-            <Link href="/bag" className="hover:text-blue-600">Shopping Cart</Link>
-          </li>
-          <li>
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </li>
-          <li className="font-semibold text-gray-800">Checkout</li>
-        </ol>
-      </nav>      
+      <Breadcrumb items={breadcrumbItems} />
 
       <div className="mb-8">
         <div className="flex items-center justify-between w-full max-w-2xl mx-auto">

@@ -9,7 +9,7 @@ import { useCart } from '@/context/CartContext';
 import ProductCard from '@/components/shop/ProductCard';
 import AccordionItem from '@/components/common/AccordionItem';
 import QuantitySelector from '@/components/shop/QuantitySelector';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import Breadcrumb from '@/components/common/Breadcrumb';
 
 // Helper function to find product by ID
 const getProductById = (id: number): Product | undefined => {
@@ -76,6 +76,12 @@ export default function ProductDetailPage() {
     );
   }
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Shop', href: '/shop' },
+    { label: product.name, current: true }
+  ];
+
   // For image zoom on hover (CSS only)
   // Add a wrapper div around the Image component and apply group-hover for zoom
   // Parent div: relative overflow-hidden group
@@ -84,21 +90,7 @@ export default function ProductDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumbs */}
-      <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
-        <ol className="list-none p-0 inline-flex">
-          <li className="flex items-center">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <ChevronRightIcon className="h-4 w-4 mx-2 text-gray-400" />
-          </li>
-          <li className="flex items-center">
-            <Link href="/shop" className="hover:text-blue-600">Shop</Link>
-            <ChevronRightIcon className="h-4 w-4 mx-2 text-gray-400" />
-          </li>
-          <li className="flex items-center">
-            <span className="font-medium text-gray-700">{product.name}</span>
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb items={breadcrumbItems} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Image Gallery */}
