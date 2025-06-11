@@ -57,33 +57,45 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
       },
     };
 
+    console.log(orderData)
+
     // Create pending order in database
     const order = await createPendingOrderInDB(orderData);
     
-    // Prepare HitPay payment request payload
+    // Prepare HitPay payment request payload with correct redirect URL
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    
+    // Use NEXT_PUBLIC_HITPAY_REDIRECT_URL if available, otherwise fall back to baseUrl
+    const confirmationPageBaseUrl = process.env.NEXT_PUBLIC_HITPAY_REDIRECT_URL || `${baseUrl}/checkout/confirmation`;
     
     const hitpayPayload: HitPayPaymentRequestPayload = {
       amount: body.totalAmount.toFixed(2),
       currency,
       email: body.customerDetails.email,
       webhook: `${baseUrl}/api/webhook`,
-      redirect_url: `${baseUrl}/checkout/confirmation?orderId=${order.id}`,
+      redirect_url: `${confirmationPageBaseUrl}?orderId=${order.id}`,
       reference_number: orderReference,
       name: body.customerDetails.fullName,
       phone: body.customerDetails.phone,
       purpose: `Karvana Order ${orderReference}`,
-      send_email: false, // We'll handle email notifications ourselves
+      send_email: true, 
       allow_repeated_payments: false,
+      add_admin_fee: true,
     };
+
+    console.log(`[API] Creating HitPay payment request for order ${order.id} with redirect URL: ${hitpayPayload.redirect_url}`);
+
+    console.log("test")
 
     // Create payment request with HitPay
     const hitpayResponse = await createHitPayPaymentRequest(hitpayPayload);
     
     // Update order with HitPay payment request ID
     await updateOrderWithHitPayId(order.id, hitpayResponse.id);
+    
+    console.log(`[API] HitPay payment request created successfully. Payment URL: ${hitpayResponse.url}`);
     
     // Return success response
     return NextResponse.json({

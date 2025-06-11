@@ -9,9 +9,10 @@ interface PaymentMethod {
 interface PaymentInfoProps {
   paymentMethod: PaymentMethod;
   orderDate: Date;
+  paymentStatus?: string;
 }
 
-const PaymentInfo: React.FC<PaymentInfoProps> = ({ paymentMethod, orderDate }) => {
+const PaymentInfo: React.FC<PaymentInfoProps> = ({ paymentMethod, orderDate, paymentStatus = 'succeeded' }) => {
   const formatDateTime = (date: Date) => {
     return date.toLocaleDateString('en-GB', {
       day: 'numeric',
@@ -24,6 +25,21 @@ const PaymentInfo: React.FC<PaymentInfoProps> = ({ paymentMethod, orderDate }) =
     });
   };
 
+  const getStatusDisplay = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'succeeded':
+        return { text: 'Payment Successful', color: 'text-green-600', bg: 'bg-green-100' };
+      case 'failed':
+        return { text: 'Payment Failed', color: 'text-red-600', bg: 'bg-red-100' };
+      case 'pending':
+        return { text: 'Payment Pending', color: 'text-yellow-600', bg: 'bg-yellow-100' };
+      default:
+        return { text: 'Payment Status Unknown', color: 'text-gray-600', bg: 'bg-gray-100' };
+    }
+  };
+
+  const statusDisplay = getStatusDisplay(paymentStatus);
+
   return (
     <section className="bg-gray-50 p-6 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -31,6 +47,33 @@ const PaymentInfo: React.FC<PaymentInfoProps> = ({ paymentMethod, orderDate }) =
       </h2>
       
       <div className="space-y-4">
+        {/* Payment Status */}
+        <div className="flex items-center space-x-3">
+          <div className={`w-8 h-8 ${statusDisplay.bg} rounded flex items-center justify-center`}>
+            {paymentStatus === 'succeeded' && (
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            {paymentStatus === 'failed' && (
+              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+            {paymentStatus === 'pending' && (
+              <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Payment Status</p>
+            <p className={`font-medium ${statusDisplay.color}`}>
+              {statusDisplay.text}
+            </p>
+          </div>
+        </div>
+
         {/* Payment Method */}
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">

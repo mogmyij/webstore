@@ -13,6 +13,7 @@ export interface HitPayPaymentRequestPayload {
   purpose?: string;
   send_email?: boolean;
   allow_repeated_payments?: boolean;
+  add_admin_fee?: boolean;
 }
 
 // HitPay API response for creating payment requests

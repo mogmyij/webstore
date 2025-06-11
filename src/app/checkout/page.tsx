@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import { CreatePaymentRequest, CreatePaymentResponse } from "@/types/hitpay";
 
 // --- Types ---
 interface CheckoutFormData {
@@ -25,21 +26,19 @@ const phoneRegex = /^[0-9]{8,15}$/;
 function validateField(name: keyof CheckoutFormData, value: string): string | null {
   switch (name) {
     case "fullName":
-      return value.trim() ? null : "Full Name is required.";
+      return value.trim().length < 2 ? "Full name must be at least 2 characters" : null;
     case "email":
-      if (!value.trim()) return "Email Address is required.";
-      if (!emailRegex.test(value)) return "Please enter a valid email address.";
-      return null;
+      return !emailRegex.test(value) ? "Please enter a valid email address" : null;
     case "phone":
-      if (!value.trim()) return "Phone Number is required.";
-      if (!phoneRegex.test(value.replace(/\s+/g, ""))) return "Enter a valid phone number (8-15 digits).";
-      return null;
+      return !phoneRegex.test(value.replace(/\s+/g, "")) ? "Phone number must be 8-15 digits" : null;
     case "address1":
-      return value.trim() ? null : "Address Line 1 is required.";
+      return value.trim().length < 5 ? "Address must be at least 5 characters" : null;
     case "city":
-      return value.trim() ? null : "City is required.";
+      return value.trim().length < 2 ? "City must be at least 2 characters" : null;
     case "postalCode":
-      return value.trim() ? null : "Postal Code is required.";
+      return !/^\d{6}$/.test(value) ? "Postal code must be 6 digits" : null;
+    case "address2":
+      return null; // Optional field
     default:
       return null;
   }
@@ -50,29 +49,30 @@ const LOCAL_STORAGE_KEY = "karvanaCheckoutForm";
 /** --- Progress Bar Steps --- */
 function StepIndicator({ step, label, active }: { step: number; label: string; active?: boolean }) {
   return (
-    <div className="flex flex-col items-center flex-1 min-w-0">
+    <div className="flex items-center">
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
-          active ? "bg-blue-600" : "bg-gray-300"
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+          active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
         }`}
       >
         {step}
       </div>
-      <span className={`mt-2 text-xm font-medium ${active ? "text-blue-600" : "text-gray-500"} truncate`}>
+      <span className={`ml-2 text-sm ${active ? "text-gray-900 font-medium" : "text-gray-500"}`}>
         {label}
       </span>
     </div>
   );
 }
 function StepConnector() {
-  return <div className="flex-1 h-1 bg-gray-200 mx-2 rounded" />;
+  return <div className="flex-1 h-px bg-gray-300 mx-4"></div>;
 }
 
 // --- Main Page Component ---
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartItems, getCartTotal } = useCart();  // --- Form State ---
+  const { cartItems, getCartTotal, clearCart } = useCart();
 
+  // --- Form State ---
   function getInitialForm(): CheckoutFormData {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -105,10 +105,14 @@ export default function CheckoutPage() {
   }
 
   const [form, setForm] = useState<CheckoutFormData>(getInitialForm);
-
+  
   // Track touched fields for error display
   const [touched, setTouched] = useState<Partial<Record<keyof CheckoutFormData, boolean>>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
+  
+  // Payment processing state
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   // Save form data to localStorage on every change
   useEffect(() => {
@@ -121,6 +125,13 @@ export default function CheckoutPage() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear payment error when user starts typing
+    if (paymentError) {
+      setPaymentError(null);
+    }
+
+    // Real-time validation if field was touched
     if (touched[name as keyof CheckoutFormData]) {
       setErrors((prev) => ({
         ...prev,
@@ -156,8 +167,10 @@ export default function CheckoutPage() {
   // --- Handle Submit (Proceed to Payment) ---
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const handleProceed = (e: FormEvent) => {
+  const handleProceed = async (e: FormEvent) => {
     e.preventDefault();
+    
+    // Mark all fields as touched for validation display
     setTouched({
       fullName: true,
       email: true,
@@ -167,15 +180,89 @@ export default function CheckoutPage() {
       postalCode: true,
       address2: true,
     });
+    
     const validation = validateForm();
     setErrors(validation);
     setSubmitAttempted(true);
 
-    if (Object.values(validation).every((v) => !v) && cartItems.length > 0) {
-      // For now, just log the data. Payment integration in next step.
-      console.log("Checkout Data:", form);
-      console.log("Cart:", cartItems);
-      // router.push("/payment"); // To be implemented in next block
+    // Clear any previous payment error
+    setPaymentError(null);
+
+    // Validate form and cart
+    if (!Object.values(validation).every((v) => !v)) {
+      setPaymentError("Please fill in all required fields correctly before proceeding.");
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      setPaymentError("Your cart is empty. Please add items before proceeding.");
+      return;
+    }
+
+    // Start payment processing
+    setIsProcessingPayment(true);
+
+    try {
+      // Prepare payment request data
+      const paymentRequest: CreatePaymentRequest = {
+        customerDetails: {
+          fullName: form.fullName,
+          email: form.email,
+          phone: form.phone,
+        },
+        shippingAddress: {
+          address1: form.address1,
+          address2: form.address2 || undefined,
+          city: form.city,
+          postalCode: form.postalCode,
+          country: "Singapore",
+        },
+        items: cartItems.map(item => ({
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+        })),
+        subtotal: getCartTotal(),
+        shippingCost: 0, // Free shipping for now
+        discountAmount: 0, // No discounts for now
+        totalAmount: getCartTotal(),
+        customerNotes: undefined,
+      };
+
+      // Call create-payment API
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentRequest),
+      });
+
+      const data: CreatePaymentResponse = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to initiate payment');
+      }
+
+      // Redirect to HitPay checkout page
+      if (data.hitpayUrl) {
+        console.log('Redirecting to HitPay:', data.hitpayUrl);
+        window.location.href = data.hitpayUrl;
+      } else {
+        throw new Error('No payment URL received from server');
+      }
+
+    } catch (error) {
+      console.error('Payment initiation error:', error);
+      setPaymentError(
+        error instanceof Error 
+          ? error.message 
+          : 'Failed to initiate payment. Please try again or contact support.'
+      );
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -212,8 +299,10 @@ export default function CheckoutPage() {
           autoComplete="off"
           onSubmit={handleProceed}
           noValidate
+          id="checkout-form"
         >
           <h2 className="text-xl font-semibold mb-6">Shipping Information</h2>
+          
           {/* Full Name */}
           <div className="mb-4">
             <label htmlFor="fullName" className="block font-medium mb-1">
@@ -363,6 +452,7 @@ export default function CheckoutPage() {
               tabIndex={-1}
             />
           </div>
+          
           {/* Actions */}
           <div className="flex items-center mt-8 gap-4">
             <Link
@@ -413,22 +503,41 @@ export default function CheckoutPage() {
                   <span className="text-gray-700">Total:</span>
                   <span className="font-bold text-lg">SGD {getCartTotal().toFixed(2)}</span>
                 </div>
+                
                 {/* Payment Button */}
                 <button
                   type="submit"
                   form="checkout-form"
-                  className={`w-full py-3 mt-6 rounded-md font-semibold text-white transition ${
-isFormValid() && cartItems.length > 0
-? "bg-blue-600 hover:bg-blue-700"
-: "bg-gray-400 cursor-not-allowed"
-}`}
-                  disabled={!isFormValid() || cartItems.length === 0}
+                  className={`w-full py-3 mt-6 rounded-md font-semibold text-white transition flex items-center justify-center ${
+                    isFormValid() && cartItems.length > 0 && !isProcessingPayment
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
+                  disabled={!isFormValid() || cartItems.length === 0 || isProcessingPayment}
                   onClick={handleProceed}
                 >
-                  Proceed to Payment
+                  {isProcessingPayment ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    "Proceed to Payment"
+                  )}
                 </button>
-                {/* If form is invalid and submit attempted, show a general error */}
-                {submitAttempted && (!isFormValid() || cartItems.length === 0) && (
+                
+                {/* Payment Error Display */}
+                {paymentError && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-red-600 text-sm text-center">{paymentError}</p>
+                  </div>
+                )}
+                
+                {/* Form validation error (fallback) */}
+                {submitAttempted && (!isFormValid() || cartItems.length === 0) && !paymentError && (
                   <div className="mt-4 text-red-600 text-sm text-center">
                     Please fill in all required fields correctly before proceeding.
                   </div>
