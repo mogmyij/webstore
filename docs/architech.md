@@ -54,7 +54,7 @@ The technical stack has been selected to provide a balance of modern development
 | State Management | React Context API | Lightweight solution for global state needs (e.g., shopping cart) |
 | Styling | Tailwind CSS | Utility-first approach for rapid UI development with consistent design |
 | API Layer | Next.js API Routes | Serverless functions for backend logic, simplifying deployment |
-| Database | TBD (PostgreSQL/MySQL/MongoDB) | Will be selected based on data structure needs |
+| Database | Neon (PostgreSQL) | Serverless PostgreSQL provider chosen for its scalability, ease of use with Next.js, and compatibility with Prisma ORM. |
 | Payment Processing | HitPay | Singapore-based payment solution supporting multiple payment methods |
 | Deployment | Vercel/Netlify | Optimized for Next.js applications |
 
@@ -381,7 +381,7 @@ cloud "Vercel/Netlify" {
   [Serverless Functions] as Functions
 }
 
-database "Database Service" as DB
+database "Neon (PostgreSQL)" as DB
 cloud "HitPay" as HP
 
 [App] --> [Static] : serves

@@ -118,7 +118,7 @@ The homepage serves as an introduction to the brand's services and trustworthine
         *   The frontend will call this API route to initiate the payment process.
         *   The backend will return the HitPay payment_request_id and checkout url (or data for Drop-In UI) to the frontend.
         *   A separate API route will be established as the webhook endpoint to receive payment status updates from HitPay. This endpoint will validate the incoming webhook data (including HMAC signature) and update the order status in the application's database.
-    *   **Database:** A database will be required to store order information, including customer details, items purchased, order status, and HitPay transaction references. (Specific database technology TBD, e.g., PostgreSQL, MySQL, MongoDB, or a BaaS like Supabase/Firebase).
+    *   **Database:** Neon has been selected as the database provider. It offers a serverless PostgreSQL database that is well-suited for Next.js applications deployed on platforms like Vercel. It will be used to store order information, including customer details, items purchased, order status, and HitPay transaction references. Prisma is recommended as the ORM for interacting with the database.
 *   **Responsiveness:** Initial focus is on desktop viewing, but the design should be implemented with future mobile responsiveness in mind where practical.
 
 ## 10. Visual Reference Guidelines

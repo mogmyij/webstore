@@ -10,6 +10,7 @@ This document provides an overview of the Karvana e-commerce project's codebase.
 *   **Styling:** Tailwind CSS
 *   **State Management:** React Context API (primarily for the shopping cart)
 *   **Routing:** Next.js built-in App Router
+*   **Database Provider:** Neon (PostgreSQL)
 *   **Data:** Mock product data (for initial build)
 
 ## 2. Project Structure
@@ -279,7 +280,7 @@ The project is organized into several key directories:
 
 ### 4.1. Order Data Structure
 
-The application now uses a standardized `Order` interface defined in `types/order.ts` to ensure data consistency across order-related functionality and prepare for future API and database integrations.
+The application now uses a standardized `Order` interface defined in `types/order.ts` to ensure data consistency across order-related functionality and prepare for future API and database integrations with the chosen Neon (PostgreSQL) database.
 
 #### Order Interface
 
@@ -360,7 +361,7 @@ The Order structure is designed to align with data collected throughout the user
 
 This unified structure standardizes data handling and prepares the application for:
 - Payment gateway integration (Block 3 & 4)
-- Database integration (Block 5)  
+- Database integration (Block 5) with Neon (PostgreSQL)
 - Order management features
 - API development
 
@@ -398,7 +399,7 @@ This unified structure standardizes data handling and prepares the application f
 *   **API Integration for Products**: Replace mock data in `data/Products.ts` with API calls to a proper backend.
 *   **Payment Gateway Integration**: Implement the actual payment processing logic in `app/checkout/page.tsx` by calling a backend API route that integrates with HitPay (as outlined in requirements).
 *   **User Accounts**: The current setup is guest-checkout only. Adding user accounts would involve authentication, user profiles, and potentially linking carts/orders to users.
-*   **Order Management Backend**: A backend system to store and manage orders created after successful checkout.
+*   **Order Management Backend**: A backend system to store and manage orders created after successful checkout, using the Neon (PostgreSQL) database.
 *   **Mobile Responsiveness**: While Tailwind CSS provides tools for responsiveness and some responsive classes are used (e.g. `md:` prefixes), a dedicated pass for mobile UX refinement might be needed.
 *   **Error Handling & Loading States**: More robust error handling (e.g., for failed data fetching if APIs were used) and visual loading states (skeletons, spinners) could be added. The product detail page has a basic "Loading..." message.
 *   **Order Confirmation Enhancements**:
