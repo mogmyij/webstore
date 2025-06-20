@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import OrderSuccessDisplay from '@/components/checkout/OrderSuccessDisplay';
@@ -15,7 +15,22 @@ import { Order } from '@/types/order';
 import { OrderResponse } from '@/types/hitpay';
 import { useCart } from '@/context/CartContext';
 
-export default function OrderConfirmationPage() {
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-8 py-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your order details...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [order, setOrder] = useState<Order | null>(null);
@@ -78,23 +93,6 @@ export default function OrderConfirmationPage() {
     { label: 'Checkout', href: '/checkout' },
     { label: 'Confirmation', current: true }
   ];
-
-  // Loading state
-  if (isLoadingOrder) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <Breadcrumb items={breadcrumbItems} />
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-8 py-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your order details...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Error state
   if (orderError || !order) {
@@ -246,5 +244,13 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }

@@ -69,17 +69,41 @@ export interface Order {
   totalAmount: number;                // Final amount (subtotal - discountAmount + shippingCost)
 
   // Order Status (Application's internal perspective)
-  status:
-    | 'pending_payment'     // Order created, awaiting payment
-    | 'payment_failed'      // Payment attempt failed
-    | 'awaiting_shipment'   // Payment successful, order being processed
-    | 'shipped'             // Order has been shipped
-    | 'delivered'           // Order has been delivered
-    | 'cancelled';          // Order has been cancelled
+  status: OrderStatus;
 
   // Payment Information (Linked to OrderPaymentDetails)
   paymentDetails?: OrderPaymentDetails; // Will be populated/updated after payment attempts/webhooks
 
   // Optional Notes
   customerNotes?: string;             // Notes provided by the customer during checkout
+}
+
+// Order status enum - exported for use in database operations
+export type OrderStatus =
+  | 'pending_payment'     // Order created, awaiting payment
+  | 'payment_failed'      // Payment attempt failed
+  | 'awaiting_shipment'   // Payment successful, order being processed
+  | 'shipped'             // Order has been shipped
+  | 'delivered'           // Order has been delivered
+  | 'cancelled';          // Order has been cancelled
+
+/**
+ * Represents the data structure required to create a new order.
+ * This is typically constructed from cart and checkout form data.
+ */
+export interface CreateOrderData {
+  userFacingOrderId: string;
+  customerDetails: OrderCustomerDetails;
+  shippingAddress: OrderShippingAddress;
+  items: Array<{
+    productId: number;
+    quantity: number;
+    price: number;
+  }>;
+  subtotal: number;
+  shippingCost?: number;
+  discountAmount?: number;
+  totalAmount: number;
+  customerNotes?: string;
+  paymentDetails?: Pick<OrderPaymentDetails, 'hitpayReferenceNumber' | 'currency'>;
 }

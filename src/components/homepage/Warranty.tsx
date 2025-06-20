@@ -12,7 +12,7 @@ const Values = () => {
           </p>
         </div>        <div className='grid grid-cols-2 gap-4'>
           <div>
-            <img src="/jimmy.jpg" alt="Value 1" className="w-full h-full object-cover" />
+            <img src="/value1.jpg" alt="Value 1" className="w-full h-full object-cover" />
           </div>
           <div>
             <img src="/value2.jpg" alt="Value 2" className="w-full h-full object-cover" />

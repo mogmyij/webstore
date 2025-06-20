@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// 1. Define the database connection
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+// 2. Define the Prisma client generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 3. Define Data Models and Enums
+
+model Product {
+  id               Int          @id @default(autoincrement())
+  name             String
+  price            Decimal      @db.Decimal(10, 2)
+  image            String
+  images           String[]
+  brand            String
+  category         String
+  description      String
+  longDescription  String
+  specifications   Json
+  features         String[]
+  dateAdded        DateTime     @default(now())
+  orderItems       OrderItem[]
+}
+
+model Order {
+  id                String              @id @default(cuid())
+  userFacingOrderId String              @unique
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Customer & Shipping
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  shippingAddress   String
+  customerNotes     String?
+  
+  // Financials
+  subtotal          Decimal             @db.Decimal(10, 2)
+  shippingCost      Decimal             @db.Decimal(10, 2) @default(0)
+  discountAmount    Decimal             @db.Decimal(10, 2) @default(0)
+  totalAmount       Decimal             @db.Decimal(10, 2)
+  
+  // Status
+  status            OrderStatus         @default(pending_payment)
+  
+  // Relations
+  items             OrderItem[]
+  transaction       HitPayTransaction?
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2) // Price at time of purchase
+  
+  // Relations
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model HitPayTransaction {
+  id                     String                   @id @default(cuid())
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+
+  paymentRequestId       String?                  @unique
+  paymentId              String?                  @unique
+  hitpayReferenceNumber  String?                  @unique
+
+  status                 HitPayTransactionStatus  @default(pending)
+  amount                 Decimal?                 @db.Decimal(10, 2)
+  currency               String?
+
+  paymentMethodType      String?
+  paymentMethodBrand     String?
+  paymentMethodLast4     String?
+
+  transactionDate        DateTime?
+  webhookReceivedAt      DateTime?
+
+  // Relation
+  order                  Order                    @relation(fields: [orderId], references: [id])
+  orderId                String                   @unique
+}
+
+enum OrderStatus {
+  pending_payment
+  payment_failed
+  awaiting_shipment
+  shipped
+  delivered
+  cancelled
+}
+
+enum HitPayTransactionStatus {
+  pending
+  succeeded
+  failed
+  requires_action
+}

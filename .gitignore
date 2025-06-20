@@ -43,3 +43,5 @@ next-env.d.ts
 # Repomix
 repomix.config.json
 src.txt
+
+/src/generated/prisma

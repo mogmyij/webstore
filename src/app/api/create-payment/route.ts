@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { CreatePaymentRequest, CreatePaymentResponse, HitPayPaymentRequestPayload } from '@/types/hitpay';
-import { Order } from '@/types/order';
+import { CreateOrderData } from '@/types/order';
 import { createPendingOrderInDB, updateOrderWithHitPayId } from '@/utils/database';
 import { createHitPayPaymentRequest, generateOrderReference } from '@/utils/hitpay';
 
@@ -33,18 +33,25 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
       );
     }
 
+    // ----------------------------- TODO: server side validation of important fields --------------------------------------
+    // valide: any fields that could pose a sql injection attack vulnarability, price fileds that could be wrong WRT the items in the order
+
     // Validate currency (must be SGD as per requirements)
     const currency = 'SGD';
     
     // Generate unique order reference for HitPay
     const orderReference = generateOrderReference();
     
-    // Prepare order data for database
-    const orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'status'> = {
+    // Prepare order data for database using the correct CreateOrderData type
+    const orderData: CreateOrderData = {
       userFacingOrderId: orderReference,
       customerDetails: body.customerDetails,
       shippingAddress: body.shippingAddress,
-      items: body.items,
+      items: body.items.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      })),
       subtotal: body.subtotal,
       discountAmount: body.discountAmount,
       shippingCost: body.shippingCost,
@@ -52,7 +59,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
       customerNotes: body.customerNotes,
       paymentDetails: {
         hitpayReferenceNumber: orderReference,
-        status: 'pending',
         currency,
       },
     };
