@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
+import { prismaToProduct } from '@/types/product';
 
 // PUT /api/admin/products/[id] - Update a product by ID
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Security check - only allow in development environment
   if (process.env.NODE_ENV !== 'development') {
@@ -13,7 +14,8 @@ export async function PUT(
   }
 
   // Parse and validate the product ID
-  const parsedId = parseInt(params.id);
+  const { id } = await params;
+  const parsedId = parseInt(id);
   if (isNaN(parsedId)) {
     return NextResponse.json(
       { error: 'Invalid product ID' },
@@ -26,12 +28,15 @@ export async function PUT(
     const body = await request.json();
 
     // Update the product
-    const updatedProduct = await prisma.product.update({
+    const updatedPrismaProduct = await prisma.product.update({
       where: { id: parsedId },
       data: body
     });
 
-    return NextResponse.json(updatedProduct, { status: 200 });
+    // Transform the updated product to our canonical type using utility function
+    const product = prismaToProduct(updatedPrismaProduct);
+
+    return NextResponse.json(product, { status: 200 });
   } catch (error) {
     console.error('Failed to update product:', error);
 
@@ -61,10 +66,10 @@ export async function PUT(
   }
 }
 
-// DELETE /api/admin/products/[id] - Delete a product by ID
+// DELETE /api/admin/products/[id] - Soft delete a product by ID (mark as inactive)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Security check - only allow in development environment
   if (process.env.NODE_ENV !== 'development') {
@@ -72,7 +77,8 @@ export async function DELETE(
   }
 
   // Parse and validate the product ID
-  const parsedId = parseInt(params.id);
+  const { id } = await params;
+  const parsedId = parseInt(id);
   if (isNaN(parsedId)) {
     return NextResponse.json(
       { error: 'Invalid product ID' },
@@ -81,28 +87,21 @@ export async function DELETE(
   }
 
   try {
-    // Delete the product
-    await prisma.product.delete({
-      where: { id: parsedId }
+    // Soft delete: mark the product as inactive instead of deleting
+    await prisma.product.update({
+      where: { id: parsedId },
+      data: { isActive: false }
     });
 
-    // Return 204 No Content on successful deletion
+    // Return 204 No Content on successful deactivation
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error('Failed to delete product:', error);
+    console.error('Failed to deactivate product:', error);
 
     // Handle specific Prisma errors
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2003') {
-        // Foreign key constraint failed - product is referenced in orders
-        return NextResponse.json(
-          { error: 'Cannot delete product. It is referenced in one or more orders.' },
-          { status: 409 }
-        );
-      }
-      
       if (error.code === 'P2025') {
-        // Record to delete does not exist
+        // Record to update does not exist
         return NextResponse.json(
           { error: 'Product not found' },
           { status: 404 }
@@ -111,7 +110,7 @@ export async function DELETE(
     }
 
     return NextResponse.json(
-      { error: 'Failed to delete product' },
+      { error: 'Failed to deactivate product' },
       { status: 500 }
     );
   }

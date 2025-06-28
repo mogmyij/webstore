@@ -1,11 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product } from '@/data/Products'; // Assuming Product type is here
-
-export interface CartItem extends Product {
-  quantity: number;
-}
+import type { Product, CartItem } from '@/types/product';
+import { ensureProductDates } from '@/types/product';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -38,7 +35,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   useEffect(() => {
     const storedCart = localStorage.getItem('karvanaCart');
     if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
+      try {
+        const parsedCart = JSON.parse(storedCart);
+        // Convert dateAdded strings back to Date objects using utility function
+        const cartWithDates = parsedCart.map((item: any) => ensureProductDates(item));
+        setCartItems(cartWithDates);
+      } catch (error) {
+        console.error('Failed to parse cart from localStorage:', error);
+        setCartItems([]);
+      }
     }
   }, []);
 

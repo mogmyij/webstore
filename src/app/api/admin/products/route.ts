@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
+import { prismaToProducts, prismaToProduct } from '@/types/product';
 
 // GET /api/admin/products - Fetch all products
 export async function GET() {
@@ -11,11 +12,14 @@ export async function GET() {
 
   try {
     // Fetch all products, sorted by dateAdded in descending order
-    const products = await prisma.product.findMany({
+    const prismaProducts = await prisma.product.findMany({
       orderBy: {
         dateAdded: 'desc'
       }
     });
+
+    // Transform Prisma products to our canonical Product type using utility function
+    const products = prismaToProducts(prismaProducts);
 
     return NextResponse.json(products, { status: 200 });
   } catch (error) {
@@ -68,11 +72,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the new product
-    const newProduct = await prisma.product.create({
+    const newPrismaProduct = await prisma.product.create({
       data: body
     });
 
-    return NextResponse.json(newProduct, { status: 201 });
+    // Transform the created product to our canonical type using utility function
+    const product = prismaToProduct(newPrismaProduct);
+
+    return NextResponse.json(product, { status: 201 });
   } catch (error) {
     console.error('Failed to create product:', error);
     

@@ -31,7 +31,10 @@ model Product {
   specifications   Json
   features         String[]
   dateAdded        DateTime     @default(now())
+  isActive         Boolean      @default(true)
   orderItems       OrderItem[]
+
+  @@index([isActive])
 }
 
 model Order {

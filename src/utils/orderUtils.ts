@@ -1,6 +1,6 @@
 // utils/orderUtils.ts
 
-import { CartItem } from '@/context/CartContext';
+import type { CartItem } from '@/types/product';
 import { Order, OrderItem, OrderCustomerDetails, OrderShippingAddress } from '@/types/order';
 
 // Interface for checkout form data (matches CheckoutFormData from checkout page)

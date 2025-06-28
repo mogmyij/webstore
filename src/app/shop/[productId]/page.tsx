@@ -1,78 +1,124 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { products, Product } from '@/data/Products';
 import { useCart } from '@/context/CartContext';
-import ProductCard from '@/components/shop/ProductCard';
 import AccordionItem from '@/components/common/AccordionItem';
 import QuantitySelector from '@/components/shop/QuantitySelector';
 import Breadcrumb from '@/components/common/Breadcrumb';
-
-// Helper function to find product by ID
-const getProductById = (id: number): Product | undefined => {
-  return products.find(p => p.id === id);
-};
-
-// Helper function to get related products
-const getRelatedProducts = (currentProduct: Product): Product[] => {
-  if (!currentProduct) return [];
-  return products
-    .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
-    .slice(0, 4); // Get up to 4 related products
-};
-
+import ProductCard from '@/components/shop/ProductCard';
+import type { Product } from '@/types/product';
+import { ensureProductsDates } from '@/types/product';
 
 export default function ProductDetailPage() {
-  const params = useParams();
+  const { productId } = useParams();
   const router = useRouter();
   const { addToCart } = useCart();
-
+  
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [quantity, setQuantity] = useState(1);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null); // For image gallery
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
+  // Fetch product from API
   useEffect(() => {
-    if (params?.productId) {
-      const productIdNum = parseInt(params.productId as string, 10);
-      if (!isNaN(productIdNum)) {
-        const foundProduct = getProductById(productIdNum);
-        if (foundProduct) {
-          setProduct(foundProduct);
-          setSelectedImage(foundProduct.image); // Set main image
-          setRelatedProducts(getRelatedProducts(foundProduct));
-        } else {
-          // Handle product not found, e.g., redirect to a 404 page or shop page
-          router.push('/shop?error=product_not_found');
+    const fetchProduct = async () => {
+      if (!productId) return;
+      
+      try {
+        setLoading(true);
+        setError('');
+        
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
         }
+        
+        const products: Product[] = await response.json();
+        
+        // Convert dateAdded strings back to Date objects using utility function
+        const productsWithDates = ensureProductsDates(products);
+        
+        const foundProduct = productsWithDates.find(p => p.id === parseInt(productId as string));
+        
+        if (!foundProduct) {
+          setError('Product not found');
+          return;
+        }
+        
+        setProduct(foundProduct);
+        setSelectedImage(foundProduct.image);
+
+        // Get related products (only active ones)
+        const activeRelatedProducts = productsWithDates
+          .filter((p: Product) => 
+            p.category === foundProduct.category && 
+            p.id !== foundProduct.id && 
+            p.isActive === true
+          )
+          .slice(0, 4);
+        
+        setRelatedProducts(activeRelatedProducts);
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch product');
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [params, router]);
+    };
+
+    fetchProduct();
+  }, [productId, router]);
 
   const handleAddToCart = () => {
-    if (product) {
+    if (product && product.isActive) {
       addToCart(product, quantity);
-      // Optionally, show a notification
-      // alert(`${product.name} (x${quantity}) added to cart!`);
     }
   };
 
   const handleBuyNow = () => {
-    if (product) {
+    if (product && product.isActive) {
       addToCart(product, quantity);
       router.push('/bag');
     }
   };
 
-  if (!product) {
-    // You can render a loading skeleton here
+  if (loading) {
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex items-center justify-center">
-            <p className="text-2xl text-gray-500">Loading product details...</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex items-center justify-center">
+        <p className="text-2xl text-gray-500">Loading product details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-2xl text-red-600 mb-4">Error loading product</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Link href="/shop" className="text-blue-600 hover:text-blue-800">
+            Back to Shop
+          </Link>
         </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-2xl text-gray-500 mb-4">Product not found</p>
+          <Link href="/shop" className="text-blue-600 hover:text-blue-800">
+            Back to Shop
+          </Link>
+        </div>
+      </div>
     );
   }
 
@@ -82,15 +128,29 @@ export default function ProductDetailPage() {
     { label: product.name, current: true }
   ];
 
-  // For image zoom on hover (CSS only)
-  // Add a wrapper div around the Image component and apply group-hover for zoom
-  // Parent div: relative overflow-hidden group
-  // Image: transition-transform duration-300 ease-in-out group-hover:scale-110
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumbs */}
       <Breadcrumb items={breadcrumbItems} />
+
+      {/* Inactive Product Warning */}
+      {!product.isActive && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start space-x-3">
+            <div className="text-yellow-600">
+              ⚠️
+            </div>
+            <div>
+              <p className="text-yellow-800 font-medium">
+                This product is no longer available
+              </p>
+              <p className="text-yellow-700 text-sm mt-1">
+                This product has been discontinued and is no longer available for purchase.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Image Gallery */}
@@ -102,12 +162,12 @@ export default function ProductDetailPage() {
                 alt={product.name}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-contain transition-transform duration-500 ease-in-out group-hover:scale-105" // CSS Zoom
-                priority // Prioritize loading for LCP
+                className="object-contain transition-transform duration-500 ease-in-out group-hover:scale-105"
+                priority
               />
             )}
           </div>
-          {/* Thumbnails (if product.images exists and has more than one image) */}
+          {/* Thumbnails */}
           {product.images && product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.images.map((imgSrc, index) => (
@@ -134,30 +194,45 @@ export default function ProductDetailPage() {
 
           {/* Purchase Actions */}
           <div className="bg-gray-50 p-6 rounded-lg shadow-sm space-y-4">
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700 font-medium">Quantity:</span>
-              <QuantitySelector quantity={quantity} onQuantityChange={setQuantity} />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-md 
-                hover:bg-blue-700 active:bg-blue-800 active:scale-95 
-                transition duration-150 ease-in-out 
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add to Cart
-              </button>
-              <button
-                onClick={handleBuyNow}
-                className="flex-1 bg-green-500 text-white font-semibold py-3 px-6 rounded-md 
-                hover:bg-green-600 transition duration-150 ease-in-out focus:outline-none 
-                focus:ring-2 focus:ring-green-500 focus:ring-offset-2 active:bg-green-800 active:scale-95"
-              >
-                Buy Now
-              </button>
-            </div>
+            {product.isActive ? (
+              <>
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700 font-medium">Quantity:</span>
+                  <QuantitySelector quantity={quantity} onQuantityChange={setQuantity} />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-md 
+                    hover:bg-blue-700 active:bg-blue-800 active:scale-95 
+                    transition duration-150 ease-in-out 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    className="flex-1 bg-green-500 text-white font-semibold py-3 px-6 rounded-md 
+                    hover:bg-green-600 transition duration-150 ease-in-out focus:outline-none 
+                    focus:ring-2 focus:ring-green-500 focus:ring-offset-2 active:bg-green-800 active:scale-95"
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 text-lg mb-4">This product is no longer available for purchase.</p>
+                <Link 
+                  href="/shop"
+                  className="inline-block bg-blue-600 text-white font-semibold py-3 px-6 rounded-md 
+                  hover:bg-blue-700 transition duration-150 ease-in-out 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Browse Other Products
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Detailed Information Accordion */}
@@ -177,12 +252,11 @@ export default function ProductDetailPage() {
                 )}
               </ul>
             </AccordionItem>
-            {/* Add more AccordionItems if needed e.g. for Shipping, Payment Options based on actual content */}
           </div>
         </div>
       </div>
 
-      {/* Related Products Section */}
+      {/* Related Products Section - Only show active products */}
       {relatedProducts.length > 0 && (
         <div className="mt-16 pt-10 border-t border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Looking for more?</h2>

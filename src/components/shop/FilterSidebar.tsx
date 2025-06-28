@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { getAllBrands, getAllCategories, getAllFeatures } from '@/data/Products';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 
@@ -18,11 +17,15 @@ interface FilterSidebarProps {
   maxPrice: number;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  // New props for dynamic filter options
+  availableBrands: string[];
+  availableCategories: string[];
+  availableFeatures: string[];
 }
 
 const weightRanges = [
   "Under 100kg",
-  "100-150kg",
+  "100-150kg", 
   "150-200kg",
   "Over 200kg"
 ];
@@ -41,12 +44,11 @@ export default function FilterSidebar({
   minPrice,
   maxPrice,
   isOpen,
-  setIsOpen
+  setIsOpen,
+  availableBrands,
+  availableCategories,
+  availableFeatures
 }: FilterSidebarProps) {
-  const brands = getAllBrands();
-  const categories = getAllCategories();
-  const features = getAllFeatures();
-
   const handleBrandChange = (brand: string) => {
     if (selectedBrands.includes(brand)) {
       setSelectedBrands(selectedBrands.filter(b => b !== brand));
@@ -127,12 +129,12 @@ export default function FilterSidebar({
                 }
               }}
               className="my-4"
-              trackStyle={{ backgroundColor: '#4B5563' }} // Customize the track color to match your design
-              handleStyle={[  // Customize handle styles
+              trackStyle={{ backgroundColor: '#4B5563' }}
+              handleStyle={[
                 { borderColor: '#4B5563' },
                 { borderColor: '#4B5563' }
               ]}
-              railStyle={{ backgroundColor: '#E5E7EB' }} // Customize rail color
+              railStyle={{ backgroundColor: '#E5E7EB' }}
               aria-label="Price range slider"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -146,7 +148,7 @@ export default function FilterSidebar({
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Brand</h3>
           <div className="space-y-2">
-            {brands.map(brand => (
+            {availableBrands.map(brand => (
               <div key={brand} className="flex items-center">
                 <input
                   type="checkbox"
@@ -165,7 +167,7 @@ export default function FilterSidebar({
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Category</h3>
           <div className="space-y-2">
-            {categories.map(category => (
+            {availableCategories.map(category => (
               <div key={category} className="flex items-center">
                 <input
                   type="checkbox"
@@ -203,7 +205,7 @@ export default function FilterSidebar({
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Features</h3>
           <div className="space-y-2">
-            {features.map(feature => (
+            {availableFeatures.map(feature => (
               <div key={feature} className="flex items-center">
                 <input
                   type="checkbox"
@@ -217,6 +219,7 @@ export default function FilterSidebar({
             ))}
           </div>
         </div>
+        
         {/*reset filters*/}
         <button
           onClick={handleClearAllFilters}
