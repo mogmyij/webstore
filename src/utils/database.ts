@@ -177,37 +177,6 @@ export const getAllOrders = async (): Promise<Order[]> => {
 };
 
 /**
- * Seeds the database with products from the mock data file.
- * This is a utility function for development and should not be exposed as an API route.
- */
-import { products as mockProducts } from '@/data/Products';
-
-export const seedProducts = async () => {
-  console.log('Seeding products...');
-  for (const product of mockProducts) {
-    await prisma.product.upsert({
-      where: { id: product.id },
-      update: {},
-      create: {
-        id: product.id,
-        name: product.name,
-        price: product.price, // Let Prisma handle the Decimal conversion
-        image: product.image,
-        images: product.images || [],
-        brand: product.brand,
-        category: product.category,
-        description: product.description,
-        longDescription: product.longDescription,
-        specifications: product.specifications, // Let Prisma handle the JSON conversion
-        features: product.features,
-        dateAdded: product.dateAdded,
-      },
-    });
-  }
-  console.log('Product seeding finished.');
-};
-
-/**
  * Helper function to transform Prisma order data to our Order type
  */
 function transformPrismaOrderToOrder(prismaOrder: any): Order {

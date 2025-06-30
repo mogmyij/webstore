@@ -6,38 +6,41 @@ import { getOrderFromDB, getAllOrders } from '@/utils/database';
 
 export async function GET(request: NextRequest): Promise<NextResponse<OrderResponse | { orders: any[] }>> {
   try {
-    const { searchParams } = new URL(request.url);
-    const orderId = searchParams.get('id');
+		// Security check: Only allow in development environment
+		if (process.env.NODE_ENV !== "development") {
+			return new NextResponse(null, { status: 404 });
+		}
 
-    // If orderId is provided, fetch specific order
-    if (orderId) {
-      const order = await getOrderFromDB(orderId);
-      
-      if (!order) {
-        return NextResponse.json(
-          { success: false, error: 'Order not found' },
-          { status: 404 }
-        );
-      }
+		const { searchParams } = new URL(request.url);
+		const orderId = searchParams.get("id");
 
-      console.log(`[API] Retrieved order: ${orderId}`);
-      return NextResponse.json({
-        success: true,
-        order,
-      });
-    }
+		// If orderId is provided, fetch specific order
+		if (orderId) {
+			const order = await getOrderFromDB(orderId);
 
-    // If no orderId provided, return all orders (for potential admin use)
-    // In production, this should be protected with authentication
-    const orders = await getAllOrders();
-    
-    console.log(`[API] Retrieved ${orders.length} orders`);
-    return NextResponse.json({
-      success: true,
-      orders,
-    });
+			if (!order) {
+				return NextResponse.json(
+					{ success: false, error: "Order not found" },
+					{ status: 404 }
+				);
+			}
 
-  } catch (error) {
+			console.log(`[API] Retrieved order: ${orderId}`);
+			return NextResponse.json({
+				success: true,
+				order,
+			});
+		}
+
+		// If no orderId provided, return all orders (for admin use only)
+		const orders = await getAllOrders();
+
+		console.log(`[API] Retrieved ${orders.length} orders`);
+		return NextResponse.json({
+			success: true,
+			orders,
+		});
+	} catch (error) {
     console.error('[API] Get orders error:', error);
     
     return NextResponse.json(
