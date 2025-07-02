@@ -1,5 +1,4 @@
-import React from 'react';
-import { Order } from '@/types/order';
+import { Order, OrderStatus } from '@/types/order';
 import PurchasedItemsList from '@/components/checkout/PurchasedItemsList';
 import CustomerDetails from '@/components/checkout/CustomerDetails';
 import PaymentInfo from '@/components/checkout/PaymentInfo';
@@ -8,9 +7,10 @@ import InvoiceDetails from '@/components/checkout/InvoiceDetails';
 interface OrderDetailModalProps {
   order: Order;
   onClose: () => void;
+  onStatusUpdate?: (orderId: string, newStatus: OrderStatus) => Promise<void>;
 }
 
-const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) => {
+const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose}) => {
   // Handle click on overlay to close modal
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -97,7 +97,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
               paymentStatus={order.paymentDetails?.status || 'pending'}
             />
           </div>
-
+          
           {/* Customer Notes (if any) */}
           {order.customerNotes && (
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">

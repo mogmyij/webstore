@@ -26,11 +26,13 @@ export async function PUT(
   try {
     // Parse the update data from request body
     const body = await request.json();
+    const {id, ...productUpdateData} = body;
 
+    console.log(`Updating product ID: ${parsedId} with data: ${JSON.stringify(productUpdateData)}`)
     // Update the product
     const updatedPrismaProduct = await prisma.product.update({
       where: { id: parsedId },
-      data: body
+      data: productUpdateData
     });
 
     // Transform the updated product to our canonical type using utility function

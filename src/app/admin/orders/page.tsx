@@ -1,15 +1,31 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Order } from '@/types/order';
+import { Order, OrderStatus } from '@/types/order';
 import OrderDetailModal from '@/components/admin/OrderDetailModal';
+
+type SortOption = 'date-desc' | 'date-asc' | 'status';
 
 export default function OrdersAdminPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+
+  // Available order statuses for updates
+  const availableStatuses: { value: OrderStatus; label: string }[] = [
+    { value: 'pending_payment', label: 'Pending Payment' },
+    { value: 'payment_failed', label: 'Payment Failed' },
+    { value: 'awaiting_shipment', label: 'Awaiting Shipment' },
+    { value: 'shipped', label: 'Shipped' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'cancelled', label: 'Cancelled' }
+  ];
 
   // Fetch orders from API
   const fetchOrders = async () => {
@@ -37,6 +53,77 @@ export default function OrdersAdminPage() {
       setLoading(false);
     }
   };
+
+  // Update order status
+  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      setUpdatingOrderId(orderId);
+      setError(null);
+
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update order status');
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update order status');
+      }
+
+      // Update the order in local state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, status: newStatus, updatedAt: new Date().toISOString() } : order
+        )
+      );
+
+      // Update selected order if it's the one being modified
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
+      }
+
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update order status');
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  // Sort and filter orders
+  useEffect(() => {
+    let result = [...orders];
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      result = result.filter(order => order.status === statusFilter);
+    }
+
+    // Apply sorting
+    result.sort((a, b) => {
+      switch (sortOption) {
+        case 'date-asc':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'date-desc':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'status':
+          return a.status.localeCompare(b.status);
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredOrders(result);
+  }, [orders, sortOption, statusFilter]);
 
   // Load orders on component mount
   useEffect(() => {
@@ -98,6 +185,57 @@ export default function OrdersAdminPage() {
         </div>
       </div>
 
+      {/* Controls: Sort and Filter */}
+      <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* Sort Dropdown */}
+          <div className="flex items-center space-x-2">
+            <label htmlFor="sort" className="text-sm font-medium text-gray-700">
+              Sort by:
+            </label>
+            <select
+              id="sort"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as SortOption)}
+              className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="date-desc">Date (Newest First)</option>
+              <option value="date-asc">Date (Oldest First)</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center space-x-2">
+            <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
+              Filter by status:
+            </label>
+            <select
+              id="status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">All Statuses</option>
+              {availableStatuses.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Refresh Button */}
+          <button
+            onClick={fetchOrders}
+            disabled={loading}
+            className="bg-gray-600 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
+      </div>
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -133,20 +271,23 @@ export default function OrdersAdminPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Update Status
+                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {orders.length === 0 ? (
+                  {filteredOrders.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                        No orders found.
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                        {statusFilter !== 'all' ? `No orders found with status "${availableStatuses.find(s => s.value === statusFilter)?.label}".` : 'No orders found.'}
                       </td>
                     </tr>
                   ) : (
-                    orders.map((order) => (
+                    filteredOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {order.userFacingOrderId || order.id}
@@ -163,6 +304,23 @@ export default function OrdersAdminPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getStatusBadge(order.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            value={order.status}
+                            onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
+                            disabled={updatingOrderId === order.id}
+                            className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {availableStatuses.map((status) => (
+                              <option key={status.value} value={status.value}>
+                                {status.label}
+                              </option>
+                            ))}
+                          </select>
+                          {updatingOrderId === order.id && (
+                            <div className="mt-1 text-xs text-blue-600">Updating...</div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
@@ -181,7 +339,7 @@ export default function OrdersAdminPage() {
           </div>
 
           {/* Results Count */}
-          {orders.length > 0 && (
+          {filteredOrders.length > 0 && (
             <div className="text-sm text-gray-500 text-center">
               Showing {orders.length} order{orders.length !== 1 ? 's' : ''}
             </div>
