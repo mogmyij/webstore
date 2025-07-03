@@ -5,7 +5,7 @@ import { OrderStatus } from '@/types/order';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ): Promise<NextResponse<OrderResponse>> {
   try {
     // Security check: Only allow in development environment
@@ -13,7 +13,7 @@ export async function PATCH(
       return new NextResponse(null, { status: 404 });
     }
 
-    const { orderId } = params;
+    const { orderId } = await params;
     const body = await request.json();
     const { status } = body;
 

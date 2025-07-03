@@ -35,27 +35,27 @@ const Bestsellers = () => {
 
   if (loading) {
     return (
-      <div className="bg-white py-12 px-6">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-4xl font-bold text-custom-gray">Our bestsellers</h2>
-          <a href="shop" className="text-gray-600 hover:text-custom-gray">More →</a>
+      <div className="bg-white py-8 sm:py-10 md:py-12 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-custom-gray">Our bestsellers</h2>
+          <a href="shop" className="text-gray-600 hover:text-custom-gray text-sm sm:text-base">More →</a>
         </div>
-        <hr className='opacity-40 py-7' />
-        <div className="flex justify-center py-8">
-          <div className="text-lg text-gray-600">Loading products...</div>
+        <hr className='opacity-40 py-4 sm:py-6 md:py-7' />
+        <div className="flex justify-center py-6 sm:py-8">
+          <div className="text-base sm:text-lg text-gray-600">Loading products...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white py-12 px-6">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-4xl font-bold text-custom-gray">Our bestsellers</h2>
-        <a href="shop" className="text-gray-600 hover:text-custom-gray">More →</a>
+    <div className="bg-white py-8 sm:py-10 md:py-12 px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-custom-gray">Our bestsellers</h2>
+        <a href="shop" className="text-gray-600 hover:text-custom-gray text-sm sm:text-base">More →</a>
       </div>
-      <hr className='opacity-40 py-7' />
-      <div className="grid grid-cols-4 gap-8">
+      <hr className='opacity-40 py-4 sm:py-6 md:py-7' />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
         {products.slice(0,4).map(product => (
           <Link key={product.id} href={`/shop/${product.id}`}>
             <ProductCard product={product} />
