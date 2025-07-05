@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "deploy:public": "git add public/ && git commit -m \"chore: Update assets in public folder\" && git push"
+    "deploy:public": "git add public/ && git commit -m \"chore: Update assets in public folder\" && git push",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
