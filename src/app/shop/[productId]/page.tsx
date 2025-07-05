@@ -219,10 +219,17 @@ export default function ProductDetailPage() {
                     Buy Now
                   </button>
                 </div>
+                <Image
+                  src={"/payment_methods.jpg"}
+                  alt={"test"}
+                  width={300}
+                  height={300}
+                  className="rounded-md object-cover "
+                />
               </>
             ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500 text-lg mb-4">This product is no longer available for purchase.</p>
+                <div className="text-center py-8">
+                  <p className="text-gray-500 text-lg mb-4">This product is no longer available for purchase.</p>
                 <Link 
                   href="/shop"
                   className="inline-block bg-blue-600 text-white font-semibold py-3 px-6 rounded-md 

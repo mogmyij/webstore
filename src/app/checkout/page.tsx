@@ -52,8 +52,8 @@ function StepIndicator({ step, label, active }: { step: number; label: string; a
     <div className="flex items-center">
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-          active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
-        }`}
+active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
+}`}
       >
         {step}
       </div>
@@ -105,11 +105,11 @@ export default function CheckoutPage() {
   }
 
   const [form, setForm] = useState<CheckoutFormData>(getInitialForm);
-  
+
   // Track touched fields for error display
   const [touched, setTouched] = useState<Partial<Record<keyof CheckoutFormData, boolean>>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
-  
+
   // Payment processing state
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -125,7 +125,7 @@ export default function CheckoutPage() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear payment error when user starts typing
     if (paymentError) {
       setPaymentError(null);
@@ -169,7 +169,7 @@ export default function CheckoutPage() {
 
   const handleProceed = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     // Mark all fields as touched for validation display
     setTouched({
       fullName: true,
@@ -180,7 +180,7 @@ export default function CheckoutPage() {
       postalCode: true,
       address2: true,
     });
-    
+
     const validation = validateForm();
     setErrors(validation);
     setSubmitAttempted(true);
@@ -302,7 +302,7 @@ export default function CheckoutPage() {
           id="checkout-form"
         >
           <h2 className="text-xl font-semibold mb-6">Shipping Information</h2>
-          
+
           {/* Full Name */}
           <div className="mb-4">
             <label htmlFor="fullName" className="block font-medium mb-1">
@@ -452,7 +452,7 @@ export default function CheckoutPage() {
               tabIndex={-1}
             />
           </div>
-          
+
           {/* Actions */}
           <div className="flex items-center mt-8 gap-4">
             <Link
@@ -503,16 +503,16 @@ export default function CheckoutPage() {
                   <span className="text-gray-700">Total:</span>
                   <span className="font-bold text-lg">SGD {getCartTotal().toFixed(2)}</span>
                 </div>
-                
+
                 {/* Payment Button */}
                 <button
                   type="submit"
                   form="checkout-form"
                   className={`w-full py-3 mt-6 rounded-md font-semibold text-white transition flex items-center justify-center ${
-                    isFormValid() && cartItems.length > 0 && !isProcessingPayment
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-gray-400 cursor-not-allowed"
-                  }`}
+isFormValid() && cartItems.length > 0 && !isProcessingPayment
+? "bg-blue-600 hover:bg-blue-700"
+: "bg-gray-400 cursor-not-allowed"
+}`}
                   disabled={!isFormValid() || cartItems.length === 0 || isProcessingPayment}
                   onClick={handleProceed}
                 >
@@ -525,17 +525,17 @@ export default function CheckoutPage() {
                       Processing...
                     </>
                   ) : (
-                    "Proceed to Payment"
-                  )}
+                      "Proceed to Payment"
+                    )}
                 </button>
-                
+
                 {/* Payment Error Display */}
                 {paymentError && (
                   <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
                     <p className="text-red-600 text-sm text-center">{paymentError}</p>
                   </div>
                 )}
-                
+
                 {/* Form validation error (fallback) */}
                 {submitAttempted && (!isFormValid() || cartItems.length === 0) && !paymentError && (
                   <div className="mt-4 text-red-600 text-sm text-center">
@@ -544,8 +544,8 @@ export default function CheckoutPage() {
                 )}
               </div>
             )}
+           
         </aside>
       </div>
     </div>
-  );
-}
+  )};

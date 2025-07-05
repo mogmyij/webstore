@@ -93,8 +93,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
 
     console.log(`[API] Creating HitPay payment request for order ${order.id} with redirect URL: ${hitpayPayload.redirect_url}`);
 
-    console.log("test")
-
     // Create payment request with HitPay
     const hitpayResponse = await createHitPayPaymentRequest(hitpayPayload);
     
