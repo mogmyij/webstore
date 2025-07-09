@@ -17,7 +17,7 @@ export async function createHitPayPaymentRequest(payload: HitPayPaymentRequestPa
     throw new Error('HITPAY_API_KEY environment variable is not set');
   }
 
-  const baseUrl = process.env.NODE_ENV === 'production' 
+  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' 
     ? 'https://api.hit-pay.com'
     : 'https://api.sandbox.hit-pay.com';
 
