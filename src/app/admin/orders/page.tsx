@@ -33,7 +33,7 @@ export default function OrdersAdminPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/orders');
+      const response = await fetch('/api/admin/orders');
       
       if (!response.ok) {
         throw new Error(`Failed to fetch orders: ${response.status}`);
