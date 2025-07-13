@@ -19,10 +19,107 @@ function LoadingFallback() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Breadcrumb skeleton */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-2 text-sm">
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
+            <span className="text-gray-400">/</span>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
+            <span className="text-gray-400">/</span>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+            <span className="text-gray-400">/</span>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-8 py-12 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your order details...</p>
+          {/* Loading header */}
+          <div className="px-8 py-12 text-center border-b border-gray-100">
+            <div className="relative mb-6">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Your Order</h2>
+            <p className="text-gray-600 mb-4">Please wait while we retrieve your order details...</p>
+            
+            {/* Loading progress indicator */}
+            <div className="max-w-md mx-auto">
+              <div className="flex justify-between text-xs text-gray-500 mb-2">
+                <span>Fetching order data</span>
+                <span>Almost there</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{width: '70%'}}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading content skeleton */}
+          <div className="px-8 py-8 space-y-8">
+            {/* Items skeleton */}
+            <div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse w-32 mb-4"></div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg">
+                    <div className="w-16 h-16 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                    </div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Invoice and payment skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="h-6 bg-gray-200 rounded animate-pulse w-24"></div>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex justify-between">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="h-6 bg-gray-200 rounded animate-pulse w-32"></div>
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex justify-between">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Customer details skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="h-6 bg-gray-200 rounded animate-pulse w-28"></div>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="h-6 bg-gray-200 rounded animate-pulse w-32"></div>
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -93,6 +190,11 @@ function OrderConfirmationContent() {
     { label: 'Checkout', href: '/checkout' },
     { label: 'Confirmation', current: true }
   ];
+
+  // Loading state - Show enhanced loading while fetching order
+  if (isLoadingOrder) {
+    return <LoadingFallback />;
+  }
 
   // Error state
   if (orderError || !order) {
