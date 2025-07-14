@@ -69,8 +69,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
     const order = await createPendingOrderInDB(orderData);
     
     // Prepare HitPay payment request payload with correct redirect URL
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}`
+    const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : process.env.NEXTAUTH_URL || 'http://localhost:3000';
     
     // Use NEXT_PUBLIC_HITPAY_REDIRECT_URL if available, otherwise fall back to baseUrl
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
       add_admin_fee: true,
     };
 
-    console.log(`[API] Creating HitPay payment request for order ${order.id} with redirect URL: ${hitpayPayload.redirect_url}`);
+    console.log(`[API] Creating HitPay payment request for order ${order.id} with redirect URL: ${hitpayPayload.redirect_url} and webhook: ${baseUrl}/api/webhook`);
 
     // Create payment request with HitPay
     const hitpayResponse = await createHitPayPaymentRequest(hitpayPayload);
