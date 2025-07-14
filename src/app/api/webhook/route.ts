@@ -31,18 +31,19 @@ async function handleWebhookV1(request: NextRequest): Promise<NextResponse> {
     const formData = await request.formData();
     const webhookData: HitPayWebhookPayload = {
       payment_id: formData.get('payment_id') as string,
-      recurring_billing_id: formData.get('recurring_billing_id') as string || undefined,
+      payment_request_id: formData.get('payment_request_id') as string,
+      phone: formData.get('phone') as string,
       amount: formData.get('amount') as string,
       currency: formData.get('currency') as string,
-      status: formData.get('status') as 'succeeded' | 'failed',
-      reference: formData.get('reference') as string,
+      status: formData.get('status') as 'completed' | 'failed',
+      reference_number: formData.get('reference_number') as string,
       hmac: formData.get('hmac') as string,
     };
 
     console.log('[Webhook V1] Received:', {
       payment_id: webhookData.payment_id,
       status: webhookData.status,
-      reference: webhookData.reference,
+      reference_number: webhookData.reference_number,
       amount: webhookData.amount,
       currency: webhookData.currency,
     });
@@ -54,9 +55,9 @@ async function handleWebhookV1(request: NextRequest): Promise<NextResponse> {
     }
 
     // Find order by reference number
-    const order = await getOrderByHitPayReference(webhookData.reference);
+    const order = await getOrderByHitPayReference(webhookData.reference_number);
     if (!order) {
-      console.error(`[Webhook V1] Order not found for reference: ${webhookData.reference}`);
+      console.error(`[Webhook V1] Order not found for reference: ${webhookData.reference_number}`);
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
@@ -67,10 +68,10 @@ async function handleWebhookV1(request: NextRequest): Promise<NextResponse> {
     }
 
     // Update order based on payment status
-    const newStatus = webhookData.status === 'succeeded' ? 'awaiting_shipment' : 'payment_failed';
+    const newStatus = webhookData.status === 'completed' ? 'awaiting_shipment' : 'payment_failed';
     const paymentDetails = {
       hitpayPaymentId: webhookData.payment_id,
-      status: (webhookData.status === 'succeeded' ? 'succeeded' : 'failed') as 'succeeded' | 'failed',
+      status: (webhookData.status === 'completed' ? 'succeeded' : 'failed') as 'succeeded' | 'failed',
       amountCharged: parseFloat(webhookData.amount),
       currency: webhookData.currency.toUpperCase(),
       transactionDate: new Date().toISOString(),

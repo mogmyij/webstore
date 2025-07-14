@@ -44,14 +44,14 @@ export interface HitPayPaymentRequestResponse {
 // HitPay Webhook V1 payload (form data)
 export interface HitPayWebhookPayload {
   payment_id: string;
-  recurring_billing_id?: string;
+  payment_request_id: string;
+  phone: string;
   amount: string;
   currency: string;
-  status: 'succeeded' | 'failed';
-  reference: string;
+  status: "completed" | "failed";
+  reference_number: string;
   hmac: string;
 }
-
 // HitPay Webhook V2 payload (JSON)
 export interface HitPayWebhookV2Payload {
   id: string; // Charge ID
