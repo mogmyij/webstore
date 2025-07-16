@@ -13,21 +13,44 @@ import Breadcrumb from '@/components/common/Breadcrumb';
 
 const CartItemRow = ({ item, onUpdateQuantity, onRemoveItem }: { item: CartItem, onUpdateQuantity: (productId: number, newQuantity: number) => void, onRemoveItem: (productId: number) => void }) => {
   return (
-    <div className="grid grid-cols-5 gap-4 py-4 border-b items-center">
-      <Link href={`/shop/${item.id}`} className="col-span-1">
-        <Image src={item.image} alt={item.name} width={96} height={96} className="w-24 h-24 object-cover" />
-      </Link>
-      <div className="col-span-1">
-        <Link href={`/shop/${item.id}`} className="font-semibold hover:text-blue-600">{item.name}</Link>
-        <div className="text-gray-600 text-sm">SGD {item.price.toFixed(2)}</div>
+    <div className="py-4 border-b">
+      {/* Mobile Layout */}
+      <div className="block md:hidden">
+        <div className="flex gap-4">
+          <Link href={`/shop/${item.id}`} className="flex-shrink-0">
+            <Image src={item.image} alt={item.name} width={80} height={80} className="w-20 h-20 object-cover rounded" />
+          </Link>
+          <div className="flex-1 min-w-0">
+            <Link href={`/shop/${item.id}`} className="font-semibold hover:text-blue-600 block truncate">{item.name}</Link>
+            <div className="text-gray-600 text-sm">SGD {item.price.toFixed(2)}</div>
+            <div className="font-semibold text-sm mt-1">Total: SGD {(item.price * item.quantity).toFixed(2)}</div>
+          </div>
+          <button onClick={() => onRemoveItem(item.id)} className="text-gray-500 hover:text-red-600 flex-shrink-0">
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="mt-3 flex justify-center">
+          <QuantitySelector quantity={item.quantity} onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)} />
+        </div>
       </div>
-      <div className="col-span-1 flex justify-center">
-        <QuantitySelector quantity={item.quantity} onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)} />
+
+      {/* Desktop Layout */}
+      <div className="hidden md:grid grid-cols-5 gap-4 items-center">
+        <Link href={`/shop/${item.id}`} className="col-span-1">
+          <Image src={item.image} alt={item.name} width={96} height={96} className="w-24 h-24 object-cover" />
+        </Link>
+        <div className="col-span-1">
+          <Link href={`/shop/${item.id}`} className="font-semibold hover:text-blue-600">{item.name}</Link>
+          <div className="text-gray-600 text-sm">SGD {item.price.toFixed(2)}</div>
+        </div>
+        <div className="col-span-1 flex justify-center">
+          <QuantitySelector quantity={item.quantity} onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)} />
+        </div>
+        <div className="col-span-1 font-semibold text-center">SGD {(item.price * item.quantity).toFixed(2)}</div>
+        <button onClick={() => onRemoveItem(item.id)} className="col-span-1 text-gray-500 hover:text-red-600 flex justify-center">
+          <XMarkIcon className="h-6 w-6" />
+        </button>
       </div>
-      <div className="col-span-1 font-semibold text-center">SGD {(item.price * item.quantity).toFixed(2)}</div>
-      <button onClick={() => onRemoveItem(item.id)} className="col-span-1 text-gray-500 hover:text-red-600 flex justify-center">
-        <XMarkIcon className="h-6 w-6" />
-      </button>
     </div>
   );
 };
