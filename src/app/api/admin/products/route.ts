@@ -42,38 +42,43 @@ export async function POST(request: NextRequest) {
     // Parse the request body
     const body = await request.json();
 
-    // Basic validation - check required fields
-    if (!body.name || typeof body.name !== 'string') {
+    // Destructure to explicitly exclude 'id' from the creation data
+    const { id, ...createData } = body;
+
+    console.log("new product data: ", createData)
+
+    // Basic validation - check required fields on the cleaned data
+    if (!createData.name || typeof createData.name !== 'string') {
       return NextResponse.json(
         { error: 'Product name is required and must be a string' },
         { status: 400 }
       );
     }
 
-    if (!body.price || typeof body.price !== 'number') {
+    if (!createData.price || typeof createData.price !== 'number') {
       return NextResponse.json(
         { error: 'Product price is required and must be a number' },
         { status: 400 }
       );
     }
 
-    if (!body.brand || typeof body.brand !== 'string') {
+    if (!createData.brand || typeof createData.brand !== 'string') {
       return NextResponse.json(
         { error: 'Product brand is required and must be a string' },
         { status: 400 }
       );
     }
 
-    if (!body.category || typeof body.category !== 'string') {
+    if (!createData.category || typeof createData.category !== 'string') {
       return NextResponse.json(
         { error: 'Product category is required and must be a string' },
         { status: 400 }
       );
     }
 
-    // Create the new product
+    // Create the new product using the data object that does not have an 'id'
     const newPrismaProduct = await prisma.product.create({
-      data: body
+      data: createData
     });
 
     // Transform the created product to our canonical type using utility function
