@@ -19,6 +19,7 @@ const Header = () => {
         <ul className="flex space-x-10">
           <li><Link href="/shop">Shop</Link></li>
           <li><Link href="/about">About</Link></li>
+          <li><Link href="/contact">Contact</Link></li>
           <li><Link href="/bag">
             <ShoppingCartIcon className='size-6 text-white'/>
             {getItemCount() > 0 && (
